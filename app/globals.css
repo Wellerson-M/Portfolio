@@ -1,35 +1,36 @@
 @import "tailwindcss";
 
 @theme {
-  /* Identidade Grafite: base escura, acento ambar. */
-  --color-graphite-950: #0b0c0b;
-  --color-graphite-900: #101110;
-  --color-graphite-850: #151615;
-  --color-graphite-800: #1c1d1c;
-  --color-graphite-750: #232423;
-  --color-graphite-700: #2c2d2c;
-  --color-graphite-600: #3a3b3a;
-  --color-graphite-500: #4d4e4c;
+  /* Grafite de verdade: cinza, nao preto. Base clara o bastante pra dar
+     contraste ao texto e as bordas aparecerem. */
+  --color-graphite-950: #17191b;
+  --color-graphite-900: #1d2023;
+  --color-graphite-850: #23272a;
+  --color-graphite-800: #2a2e32;
+  --color-graphite-750: #333940;
+  --color-graphite-700: #3f464d;
+  --color-graphite-600: #525a62;
+  --color-graphite-500: #6b747c;
 
-  --color-ink-100: #ecece8;
-  --color-ink-200: #d4d4cf;
-  --color-ink-300: #adada7;
-  --color-ink-400: #85857f;
-  --color-ink-500: #66665f;
-  --color-ink-600: #4b4b45;
+  --color-ink-100: #f5f6f7;
+  --color-ink-200: #e0e3e6;
+  --color-ink-300: #c2c8cd;
+  --color-ink-400: #9ba3aa;
+  --color-ink-500: #7f878e;
+  --color-ink-600: #656d74;
 
-  --color-amber-200: #f0d5a0;
-  --color-amber-300: #e5bb72;
-  --color-amber-400: #d3a052;
-  --color-amber-500: #b8853a;
-  --color-amber-600: #8f662b;
+  --color-amber-200: #ffdb9c;
+  --color-amber-300: #f7c471;
+  --color-amber-400: #ecab48;
+  --color-amber-500: #d29134;
+  --color-amber-600: #ab7328;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", monospace;
 
-  --text-hero: clamp(2.75rem, 11vw, 8rem);
-  --text-section: clamp(1.75rem, 5vw, 3rem);
-  --text-feature: clamp(2.25rem, 7vw, 4.5rem);
+  --text-hero: clamp(2.75rem, 10.5vw, 7.5rem);
+  --text-section: clamp(1.75rem, 4.5vw, 2.75rem);
+  --text-feature: clamp(2.25rem, 6.5vw, 4rem);
 }
 
 :root {
@@ -59,7 +60,7 @@ body {
 :focus-visible {
   outline: 2px solid var(--color-amber-400);
   outline-offset: 3px;
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
 /* ---- Spotlight do cursor ---------------------------------------------- */
@@ -67,11 +68,11 @@ body {
 .spotlight-layer {
   position: fixed;
   inset: 0;
-  z-index: 30;
+  z-index: 5;
   pointer-events: none;
   background: radial-gradient(
-    340px circle at var(--spot-x) var(--spot-y),
-    color-mix(in srgb, var(--color-amber-300) 9%, transparent),
+    360px circle at var(--spot-x) var(--spot-y),
+    color-mix(in srgb, var(--color-amber-300) 8%, transparent),
     color-mix(in srgb, var(--color-amber-500) 3%, transparent) 45%,
     transparent 70%
   );
@@ -87,15 +88,15 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 31;
+  z-index: 60;
   width: 26px;
   height: 26px;
   margin: -13px 0 0 -13px;
-  border: 1px solid color-mix(in srgb, var(--color-amber-300) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-amber-300) 60%, transparent);
   border-radius: 9999px;
   pointer-events: none;
   opacity: 0;
-  transform: translate3d(var(--spot-x), var(--spot-y), 0) scale(1);
+  transform: translate3d(var(--spot-x), var(--spot-y), 0);
   transition:
     opacity 300ms ease,
     width 200ms ease,
@@ -112,18 +113,19 @@ body {
   width: 46px;
   height: 46px;
   margin: -23px 0 0 -23px;
-  border-color: color-mix(in srgb, var(--color-amber-200) 80%, transparent);
+  border-color: color-mix(in srgb, var(--color-amber-200) 85%, transparent);
 }
 
 /* ---- Reveal no scroll -------------------------------------------------- */
 
 .reveal {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(26px);
   transition:
-    opacity 620ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 780ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 780ms cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
 }
 
 .reveal[data-shown="true"] {
@@ -155,16 +157,6 @@ body {
   }
 }
 
-.hairline {
-  background-image: linear-gradient(
-    to right,
-    transparent,
-    var(--color-graphite-700) 12%,
-    var(--color-graphite-700) 88%,
-    transparent
-  );
-}
-
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -183,5 +175,9 @@ body {
   .spotlight-layer,
   .spotlight-ring {
     display: none;
+  }
+
+  .carousel-slide {
+    transition: none !important;
   }
 }

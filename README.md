@@ -35,16 +35,20 @@ app/
   globals.css       paleta grafite/âmbar, spotlight, reveal, caret
 components/
   sections/         Hero, Sobre, Sigof, Demos, Outros, Contato
-  ui/               Spotlight, Reveal, Gallery, LiveFrame, bits, useMediaQuery
+  ui/               SectionNav, Spotlight, Reveal, Carousel, LiveFrame,
+                    bits, useMediaQuery
 lib/
   projects.ts       todo o conteúdo dos projetos, sem CMS
 public/assets/
   notes/            prints do Notes
   denovonao/        prints do DeNovoNao
-  sigof/mockups/    seis telas do RFC
-  sigof/diagramas/  C4 em três níveis e casos de uso
+  sigof/mockups/    telas do sistema
   cv.pdf            currículo do botão de download
 ```
+
+As capturas de tela em `public/assets/` já estão com a barra de status do
+celular recortada. Os arquivos originais, sem recorte, seguem em `notes/` e
+`DNN/` na raiz, fora do controle de versão.
 
 ## Editar conteúdo
 
@@ -53,18 +57,27 @@ e nenhuma seção tem texto hardcoded fora dele, com exceção do hero e do sobr
 que vivem nos próprios componentes por serem parágrafo único.
 
 Para trocar ou acrescentar um print: coloque o arquivo em `public/assets/<projeto>/`
-e adicione uma entrada em `shots`, com `src`, `alt` e `caption`. O `alt` é lido
-por leitor de tela, então descreva a tela, não repita o nome do projeto.
+e adicione uma entrada em `shots`, com `src` e `alt`. O `alt` é lido por leitor
+de tela, então descreva a tela, não repita o nome do projeto.
 
-## Efeitos
+## Navegação e efeitos
 
-O site tem dois, de propósito:
+`components/ui/SectionNav.tsx` é o toggler fixo entre as seções. Ele aparece
+depois que o hero sai da tela e marca a seção visível. Para acrescentar uma
+seção ao toggler, adicione o par `{ id, label }` na constante `SECTIONS` e
+garanta que a seção tenha esse `id` no DOM.
+
+Os efeitos são dois, de propósito:
 
 1. **Spotlight do cursor** (`components/ui/Spotlight.tsx`): um círculo pequeno
    seguindo o mouse com um halo âmbar. Só monta em ponteiro fino, e some com
    `prefers-reduced-motion: reduce`.
-2. **Reveal no scroll** (`components/ui/Reveal.tsx`): fade curto com slide up
-   quando a seção entra na viewport, uma vez só.
+2. **Reveal no scroll** (`components/ui/Reveal.tsx`): fade com slide up quando a
+   seção entra na viewport, uma vez só.
+
+Os prints ficam em `components/ui/Carousel.tsx`: três por vez, o do meio nítido
+e os vizinhos desfocados. Clique no vizinho para centralizar, no centro para
+abrir em tela cheia.
 
 Ambos respeitam movimento reduzido. O CSS de `prefers-reduced-motion` em
 `globals.css` é a fonte da verdade; os componentes não duplicam a decisão.

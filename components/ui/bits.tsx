@@ -1,33 +1,19 @@
 import type { ReactNode } from 'react'
 
-/** Linha de comando decorativa, marca de terminal sem virar tema. */
-export function Prompt({ children }: { children: ReactNode }) {
-  return (
-    <p className="font-mono text-xs tracking-tight text-ink-600 select-none">
-      <span className="text-amber-600">~/portfolio</span>
-      <span className="text-ink-600"> $ </span>
-      <span className="text-ink-400">{children}</span>
-    </p>
-  )
-}
-
-/** Cabeçalho de seção: número, comando decorativo e título. */
+/** Cabeçalho de seção: índice discreto e título em monospace. */
 export function SectionHeader({
   index,
-  command,
   title,
   id,
 }: {
   index: string
-  command: string
   title: string
   id?: string
 }) {
   return (
-    <header id={id} className="scroll-mt-24">
-      <Prompt>{command}</Prompt>
-      <h2 className="mt-3 flex items-baseline gap-3 font-mono text-[length:var(--text-section)] leading-none font-medium text-ink-100">
-        <span className="text-base font-normal text-amber-500">{index}</span>
+    <header id={id} className="scroll-mt-28">
+      <h2 className="flex items-baseline gap-3 font-mono text-[length:var(--text-section)] leading-none font-medium text-ink-100">
+        <span className="text-sm font-normal text-amber-400">{index}</span>
         {title}
       </h2>
     </header>
@@ -36,7 +22,7 @@ export function SectionHeader({
 
 export function Tag({ children }: { children: ReactNode }) {
   return (
-    <li className="rounded border border-graphite-750 px-2 py-1 font-mono text-[0.7rem] text-ink-400">
+    <li className="rounded border border-graphite-750 bg-graphite-900 px-2.5 py-1 font-mono text-xs text-ink-300">
       {children}
     </li>
   )
@@ -61,15 +47,15 @@ export function Status({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[0.7rem] ${
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs ${
         tone === 'live'
-          ? 'border-amber-600/50 text-amber-300'
-          : 'border-graphite-700 text-ink-500'
+          ? 'border-amber-500/50 bg-amber-500/10 text-amber-300'
+          : 'border-graphite-700 text-ink-400'
       }`}
     >
       <span
         className={`h-1.5 w-1.5 rounded-full ${
-          tone === 'live' ? 'bg-amber-400' : 'bg-ink-600'
+          tone === 'live' ? 'bg-amber-400' : 'bg-ink-500'
         }`}
       />
       {children}
@@ -77,7 +63,6 @@ export function Status({
   )
 }
 
-/** Link externo com seta. Único estilo de CTA do site. */
 export function ExternalLink({
   href,
   children,
@@ -94,7 +79,7 @@ export function ExternalLink({
       rel="noopener noreferrer"
       className={`group inline-flex items-center gap-1.5 font-mono text-sm transition-colors ${
         emphasis
-          ? 'rounded border border-amber-600/60 px-3 py-1.5 text-amber-300 hover:border-amber-400 hover:text-amber-200'
+          ? 'rounded border border-amber-500/60 bg-amber-500/5 px-3.5 py-2 text-amber-300 hover:border-amber-400 hover:bg-amber-500/10 hover:text-amber-200'
           : 'text-ink-400 hover:text-amber-300'
       }`}
     >
@@ -109,11 +94,10 @@ export function ExternalLink({
   )
 }
 
-/** Espaço reservado para print que ainda não existe. */
 export function Placeholder({ label }: { label: string }) {
   return (
-    <div className="flex aspect-[16/10] items-center justify-center rounded-md border border-dashed border-graphite-700 bg-graphite-900/60">
-      <p className="px-4 text-center font-mono text-xs text-ink-600">{label}</p>
+    <div className="flex aspect-[16/9] items-center justify-center rounded-lg border border-dashed border-graphite-700 bg-graphite-900/60">
+      <p className="px-4 text-center font-mono text-xs text-ink-500">{label}</p>
     </div>
   )
 }

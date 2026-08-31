@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
+import SectionNav from '@/components/ui/SectionNav'
 import Spotlight from '@/components/ui/Spotlight'
 import './globals.css'
 
@@ -18,11 +19,11 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Wellerson Meredyk · Engenharia de Software',
   description:
-    'Portfolio de Wellerson Meredyk. Engenharia de Software, 7o semestre. Projetos em React, Next.js, Node.js e TypeScript.',
+    'Portfolio de Wellerson Meredyk. Desenvolvedor de software: backend, aplicações web e sistemas. Node.js, Next.js, TypeScript e banco de dados.',
   openGraph: {
     title: 'Wellerson Meredyk · Engenharia de Software',
     description:
-      'Gosto de resolver problemas com sistema. Projetos em React, Next.js, Node.js e TypeScript.',
+      'Backend, aplicações web e sistemas. Node.js, Next.js, TypeScript e banco de dados.',
     type: 'website',
     locale: 'pt_BR',
   },
@@ -38,10 +39,11 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <Spotlight />
         <a
           href="#sobre"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded focus:bg-amber-400 focus:px-4 focus:py-2 focus:font-mono focus:text-sm focus:text-graphite-950"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-60 focus:rounded focus:bg-amber-400 focus:px-4 focus:py-2 focus:font-mono focus:text-sm focus:text-graphite-950"
         >
           Pular para o conteúdo
         </a>
+        <SectionNav />
         {children}
       </body>
     </html>
