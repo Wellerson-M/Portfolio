@@ -8,7 +8,7 @@ export default function Contato() {
   const links = [
     { label: 'GitHub', value: '@Wellerson-M', href: contact.github },
     contact.linkedin
-      ? { label: 'LinkedIn', value: 'perfil', href: contact.linkedin }
+      ? { label: 'LinkedIn', value: 'wellerson-meredyk', href: contact.linkedin }
       : null,
     { label: 'E-mail', value: contact.email, href: `mailto:${contact.email}` },
   ].filter((link) => link !== null)
@@ -17,7 +17,7 @@ export default function Contato() {
     <footer className="border-t border-graphite-850 bg-graphite-900/40 px-6 py-24 sm:px-10 lg:px-16 lg:py-32">
       <div className="mx-auto max-w-6xl">
         <Reveal>
-          <SectionHeader id="contato" index="04" title="Contato" />
+          <SectionHeader id="contato" index="03" title="Contato" />
         </Reveal>
 
         <Reveal delay={80} className="mt-12">
@@ -67,12 +67,9 @@ export default function Contato() {
         </Reveal>
 
         <Reveal delay={200} className="mt-20">
-          <div className="flex flex-wrap items-center justify-between gap-4 font-mono text-xs text-ink-500">
-            <p>
-              <span className="text-amber-500">~/portfolio</span> $ exit
-            </p>
-            <p>Wellerson Meredyk · {YEAR} · Joinville, SC</p>
-          </div>
+          <p className="font-mono text-xs text-ink-500">
+            Wellerson Meredyk · {YEAR}
+          </p>
         </Reveal>
       </div>
     </footer>

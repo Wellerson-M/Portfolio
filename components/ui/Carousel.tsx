@@ -6,9 +6,39 @@ import type { Shot } from '@/lib/projects'
 
 type Props = {
   shots: Shot[]
-  /** Prints de celular são altos; telas de sistema são largas. */
-  shape?: 'phone' | 'screen'
+  shape?: Shape
 }
+
+export type Shape = 'phone' | 'screen' | 'wide'
+
+/**
+ * Cada conjunto de prints tem a proporção do que foi capturado: celular em pé,
+ * mockup de sistema em 5:4, print de tela cheia em 16:9. Errar isso deixa
+ * tarja sobrando na moldura ou corta a lateral da interface.
+ */
+const SHAPES = {
+  phone: {
+    stage: 'h-[26rem] sm:h-[32rem]',
+    slide: 'h-[26rem] w-[12.4rem] sm:h-[32rem] sm:w-[15.3rem]',
+    step: 78,
+    sizes: '250px',
+    fit: 'object-cover object-top',
+  },
+  screen: {
+    stage: 'h-[15rem] sm:h-[21rem] lg:h-[25rem]',
+    slide: 'h-[15rem] w-[18.75rem] sm:h-[21rem] sm:w-[26.25rem] lg:h-[25rem] lg:w-[31.25rem]',
+    step: 60,
+    sizes: '500px',
+    fit: 'object-contain',
+  },
+  wide: {
+    stage: 'h-[13rem] sm:h-[19rem] lg:h-[23rem]',
+    slide: 'h-[13rem] w-[23.1rem] sm:h-[19rem] sm:w-[33.8rem] lg:h-[23rem] lg:w-[40.9rem]',
+    step: 62,
+    sizes: '660px',
+    fit: 'object-contain',
+  },
+} as const
 
 /**
  * Carrossel de três: o do meio nítido e em tamanho cheio, os dois vizinhos
@@ -44,14 +74,12 @@ export default function Carousel({ shots, shape = 'phone' }: Props) {
     }
   }, [full, go])
 
-  const phone = shape === 'phone'
+  const form = SHAPES[shape]
 
   return (
     <div>
       <div
-        className={`relative flex items-center justify-center overflow-hidden ${
-          phone ? 'h-[26rem] sm:h-[32rem]' : 'h-[15rem] sm:h-[22rem] lg:h-[26rem]'
-        }`}
+        className={`relative flex items-center justify-center overflow-hidden ${form.stage}`}
       >
         {shots.map((shot, index) => {
           // Distância circular até o slide ativo, pra o carrossel dar a volta.
@@ -73,7 +101,7 @@ export default function Carousel({ shots, shape = 'phone' }: Props) {
               aria-current={center}
               className="carousel-slide absolute cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
               style={{
-                transform: `translateX(${delta * (phone ? 78 : 62)}%) scale(${center ? 1 : 0.82})`,
+                transform: `translateX(${delta * form.step}%) scale(${center ? 1 : 0.82})`,
                 filter: center ? 'none' : 'blur(3px)',
                 opacity: center ? 1 : 0.45,
                 zIndex: center ? 2 : 1,
@@ -82,18 +110,14 @@ export default function Carousel({ shots, shape = 'phone' }: Props) {
               <span
                 className={`relative block overflow-hidden rounded-xl border bg-graphite-900 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.85)] ${
                   center ? 'border-graphite-600' : 'border-graphite-800'
-                } ${
-                  phone
-                    ? 'h-[26rem] w-[12.4rem] sm:h-[32rem] sm:w-[15.3rem]'
-                    : 'h-[15rem] w-[24rem] sm:h-[22rem] sm:w-[35.2rem] lg:h-[26rem] lg:w-[41.6rem]'
-                }`}
+                } ${form.slide}`}
               >
                 <Image
                   src={shot.src}
                   alt={shot.alt}
                   fill
-                  sizes={phone ? '250px' : '670px'}
-                  className="object-cover object-top"
+                  sizes={form.sizes}
+                  className={form.fit}
                   priority={index === 0}
                 />
               </span>

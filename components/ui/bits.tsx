@@ -1,28 +1,44 @@
 import type { ReactNode } from 'react'
 
-/** Cabeçalho de seção: índice discreto e título em monospace. */
+/**
+ * Cabeçalho de seção. A régua com o índice é o que separa uma seção da outra:
+ * some pra direita e devolve o título logo abaixo.
+ */
 export function SectionHeader({
   index,
   title,
   id,
+  note,
 }: {
   index: string
   title: string
   id?: string
+  note?: string
 }) {
   return (
     <header id={id} className="scroll-mt-28">
-      <h2 className="flex items-baseline gap-3 font-mono text-[length:var(--text-section)] leading-none font-medium text-ink-100">
-        <span className="text-sm font-normal text-amber-400">{index}</span>
+      <div className="flex items-center gap-4">
+        <span className="font-mono text-xs tracking-widest text-amber-400">
+          {index}
+        </span>
+        <span
+          aria-hidden
+          className="h-px flex-1 bg-gradient-to-r from-graphite-700 via-graphite-800 to-transparent"
+        />
+      </div>
+
+      <h2 className="mt-5 font-mono text-[length:var(--text-section)] leading-none font-medium tracking-tight text-ink-100">
         {title}
       </h2>
+
+      {note && <p className="mt-3 max-w-md text-sm text-ink-400">{note}</p>}
     </header>
   )
 }
 
 export function Tag({ children }: { children: ReactNode }) {
   return (
-    <li className="rounded border border-graphite-750 bg-graphite-900 px-2.5 py-1 font-mono text-xs text-ink-300">
+    <li className="rounded border border-graphite-750 bg-graphite-850/70 px-2.5 py-1 font-mono text-xs text-ink-300">
       {children}
     </li>
   )
@@ -35,31 +51,6 @@ export function StackList({ items }: { items: string[] }) {
         <Tag key={item}>{item}</Tag>
       ))}
     </ul>
-  )
-}
-
-export function Status({
-  children,
-  tone = 'live',
-}: {
-  children: ReactNode
-  tone?: 'live' | 'muted'
-}) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs ${
-        tone === 'live'
-          ? 'border-amber-500/50 bg-amber-500/10 text-amber-300'
-          : 'border-graphite-700 text-ink-400'
-      }`}
-    >
-      <span
-        className={`h-1.5 w-1.5 rounded-full ${
-          tone === 'live' ? 'bg-amber-400' : 'bg-ink-500'
-        }`}
-      />
-      {children}
-    </span>
   )
 }
 
@@ -79,7 +70,7 @@ export function ExternalLink({
       rel="noopener noreferrer"
       className={`group inline-flex items-center gap-1.5 font-mono text-sm transition-colors ${
         emphasis
-          ? 'rounded border border-amber-500/60 bg-amber-500/5 px-3.5 py-2 text-amber-300 hover:border-amber-400 hover:bg-amber-500/10 hover:text-amber-200'
+          ? 'rounded border border-amber-500/60 bg-amber-500/10 px-3.5 py-2 text-amber-200 hover:border-amber-400 hover:bg-amber-500/20 hover:text-amber-100'
           : 'text-ink-400 hover:text-amber-300'
       }`}
     >
@@ -91,13 +82,5 @@ export function ExternalLink({
         &#8599;
       </span>
     </a>
-  )
-}
-
-export function Placeholder({ label }: { label: string }) {
-  return (
-    <div className="flex aspect-[16/9] items-center justify-center rounded-lg border border-dashed border-graphite-700 bg-graphite-900/60">
-      <p className="px-4 text-center font-mono text-xs text-ink-500">{label}</p>
-    </div>
   )
 }

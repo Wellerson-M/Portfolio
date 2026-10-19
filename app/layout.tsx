@@ -19,11 +19,10 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Wellerson Meredyk · Engenharia de Software',
   description:
-    'Portfolio de Wellerson Meredyk. Desenvolvedor de software: backend, aplicações web e sistemas. Node.js, Next.js, TypeScript e banco de dados.',
+    'Portfólio de Wellerson Meredyk, estudante de Engenharia de Software em Joinville (SC). Projetos web com demonstrações para testar.',
   openGraph: {
     title: 'Wellerson Meredyk · Engenharia de Software',
-    description:
-      'Backend, aplicações web e sistemas. Node.js, Next.js, TypeScript e banco de dados.',
+    description: 'Projetos web com demonstrações para testar.',
     type: 'website',
     locale: 'pt_BR',
   },

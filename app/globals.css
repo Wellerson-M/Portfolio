@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  /* Grafite de verdade: cinza, nao preto. Base clara o bastante pra dar
-     contraste ao texto e as bordas aparecerem. */
-  --color-graphite-950: #17191b;
-  --color-graphite-900: #1d2023;
-  --color-graphite-850: #23272a;
-  --color-graphite-800: #2a2e32;
-  --color-graphite-750: #333940;
-  --color-graphite-700: #3f464d;
-  --color-graphite-600: #525a62;
-  --color-graphite-500: #6b747c;
+  /* Grafite quente e claro o bastante pra nao virar um bloco preto: a base ja
+     tem luz propria e as superficies acima dela sobem de degrau em degrau. */
+  --color-graphite-950: #2a2e34;
+  --color-graphite-900: #32363d;
+  --color-graphite-850: #3a4048;
+  --color-graphite-800: #444a54;
+  --color-graphite-750: #515863;
+  --color-graphite-700: #616976;
+  --color-graphite-600: #79818e;
+  --color-graphite-500: #929aa6;
 
-  --color-ink-100: #f5f6f7;
-  --color-ink-200: #e0e3e6;
-  --color-ink-300: #c2c8cd;
-  --color-ink-400: #9ba3aa;
-  --color-ink-500: #7f878e;
-  --color-ink-600: #656d74;
+  --color-ink-100: #f5f7f9;
+  --color-ink-200: #e2e6eb;
+  --color-ink-300: #c2c9d1;
+  --color-ink-400: #9ea6b1;
+  --color-ink-500: #868e99;
+  --color-ink-600: #737b86;
 
   --color-amber-200: #ffdb9c;
   --color-amber-300: #f7c471;
@@ -30,12 +30,13 @@
 
   --text-hero: clamp(2.75rem, 10.5vw, 7.5rem);
   --text-section: clamp(1.75rem, 4.5vw, 2.75rem);
-  --text-feature: clamp(2.25rem, 6.5vw, 4rem);
+  --text-feature: clamp(2rem, 5.5vw, 3.25rem);
 }
 
 :root {
   --spot-x: 50vw;
   --spot-y: 50vh;
+  --grid-line: color-mix(in srgb, var(--color-ink-100) 4.5%, transparent);
   color-scheme: dark;
 }
 
@@ -46,6 +47,21 @@ html {
 
 body {
   background-color: var(--color-graphite-950);
+  /* Halo ambar no topo + malha fina, pra a pagina ter textura em vez de um
+     fundo chapado. Fixed: a malha nao rola junto e nao cria bandeamento. */
+  background-image:
+    radial-gradient(
+      75rem 34rem at 50% -8rem,
+      color-mix(in srgb, var(--color-amber-500) 9%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    4.5rem 4.5rem,
+    4.5rem 4.5rem;
+  background-attachment: fixed;
   color: var(--color-ink-200);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -72,8 +88,8 @@ body {
   pointer-events: none;
   background: radial-gradient(
     360px circle at var(--spot-x) var(--spot-y),
-    color-mix(in srgb, var(--color-amber-300) 8%, transparent),
-    color-mix(in srgb, var(--color-amber-500) 3%, transparent) 45%,
+    color-mix(in srgb, var(--color-amber-300) 9%, transparent),
+    color-mix(in srgb, var(--color-amber-500) 4%, transparent) 45%,
     transparent 70%
   );
   opacity: 0;
@@ -82,38 +98,6 @@ body {
 
 .spotlight-layer[data-active="true"] {
   opacity: 1;
-}
-
-.spotlight-ring {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 60;
-  width: 26px;
-  height: 26px;
-  margin: -13px 0 0 -13px;
-  border: 1px solid color-mix(in srgb, var(--color-amber-300) 60%, transparent);
-  border-radius: 9999px;
-  pointer-events: none;
-  opacity: 0;
-  transform: translate3d(var(--spot-x), var(--spot-y), 0);
-  transition:
-    opacity 300ms ease,
-    width 200ms ease,
-    height 200ms ease,
-    margin 200ms ease,
-    border-color 200ms ease;
-}
-
-.spotlight-ring[data-active="true"] {
-  opacity: 1;
-}
-
-.spotlight-ring[data-hot="true"] {
-  width: 46px;
-  height: 46px;
-  margin: -23px 0 0 -23px;
-  border-color: color-mix(in srgb, var(--color-amber-200) 85%, transparent);
 }
 
 /* ---- Reveal no scroll -------------------------------------------------- */
@@ -133,6 +117,19 @@ body {
   transform: none;
 }
 
+/* ---- Entrada do topo ---------------------------------------------------- */
+
+.hero-in {
+  animation: hero-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
 /* ---- Detalhes ---------------------------------------------------------- */
 
 .caret::after {
@@ -146,6 +143,16 @@ body {
   animation: blink 1.15s steps(1) infinite;
 }
 
+/* Versao miuda, pro canto da barra de navegacao. */
+.caret-dot {
+  display: inline-block;
+  width: 2px;
+  height: 0.7rem;
+  border-radius: 1px;
+  background-color: var(--color-amber-400);
+  animation: blink 1.5s steps(1) infinite;
+}
+
 @keyframes blink {
   0%,
   50% {
@@ -157,24 +164,20 @@ body {
   }
 }
 
+/* Sem animacao no sistema, o site ficava completamente inerte. Aqui o que sai
+   e o deslocamento; fade e piscada de cursor sao so opacidade e ficam. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
 
   .reveal {
-    opacity: 1;
     transform: none;
-    transition: none;
+    transition: opacity 420ms ease var(--reveal-delay, 0ms);
   }
 
-  .caret::after {
+  .hero-in {
     animation: none;
-  }
-
-  .spotlight-layer,
-  .spotlight-ring {
-    display: none;
   }
 
   .carousel-slide {

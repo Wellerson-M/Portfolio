@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 const SECTIONS = [
   { id: 'inicio', label: 'início' },
   { id: 'sobre', label: 'sobre' },
-  { id: 'sigof', label: 'SIGOF' },
   { id: 'projetos', label: 'projetos' },
   { id: 'contato', label: 'contato' },
 ]
@@ -55,7 +54,13 @@ export default function SectionNav() {
           : 'pointer-events-none translate-y-3 opacity-0 sm:-translate-y-3'
       }`}
     >
-      <ul className="flex items-center gap-0.5 rounded-full border border-graphite-750 bg-graphite-900/85 p-1 shadow-[0_18px_40px_-20px_rgba(0,0,0,0.9)] backdrop-blur-md">
+      {/* Fundo bem translucido: o blur so aparece se der pra ver a pagina por
+          tras dele. */}
+      <ul className="flex items-center gap-0.5 rounded-full border border-graphite-750/80 bg-graphite-900/45 py-1 pr-1 pl-3 shadow-[0_18px_44px_-22px_rgba(0,0,0,0.85)] backdrop-blur-xl backdrop-saturate-150">
+        <li aria-hidden className="flex items-center pr-1.5">
+          <span className="caret-dot" />
+        </li>
+
         {SECTIONS.map((section) => (
           <li key={section.id}>
             <a
@@ -64,7 +69,7 @@ export default function SectionNav() {
               className={`block rounded-full px-3 py-1.5 font-mono text-xs transition-colors sm:px-3.5 ${
                 active === section.id
                   ? 'bg-amber-400 text-graphite-950'
-                  : 'text-ink-400 hover:text-amber-300'
+                  : 'text-ink-300 hover:text-amber-300'
               }`}
             >
               {section.label}

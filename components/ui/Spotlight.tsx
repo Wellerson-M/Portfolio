@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from 'react'
 import useMediaQuery from '@/components/ui/useMediaQuery'
 
 /**
- * Efeito unico de mouse do site: um circulo pequeno seguindo o cursor com um
- * halo ambar suave iluminando a regiao atras dele.
+ * Efeito unico de mouse do site: um halo ambar suave iluminando a regiao
+ * atras do cursor.
  *
  * Nao renderiza em dispositivo sem ponteiro fino (touch) nem quando o usuario
- * pede movimento reduzido, e o CSS tambem esconde as camadas nesse caso.
+ * pede movimento reduzido.
  */
 export default function Spotlight() {
   const fine = useMediaQuery('(pointer: fine)')
@@ -16,7 +16,6 @@ export default function Spotlight() {
   const enabled = fine && !calm
 
   const [active, setActive] = useState(false)
-  const [hot, setHot] = useState(false)
   const frame = useRef<number | null>(null)
   const next = useRef({ x: 0, y: 0 })
 
@@ -34,13 +33,6 @@ export default function Spotlight() {
     const onMove = (event: MouseEvent) => {
       next.current = { x: event.clientX, y: event.clientY }
       setActive(true)
-
-      const target = event.target
-      setHot(
-        target instanceof Element &&
-          target.closest('a, button, [data-spot-hot]') !== null,
-      )
-
       frame.current ??= requestAnimationFrame(flush)
     }
 
@@ -60,15 +52,5 @@ export default function Spotlight() {
 
   if (!enabled) return null
 
-  return (
-    <>
-      <div className="spotlight-layer" data-active={active} aria-hidden />
-      <div
-        className="spotlight-ring"
-        data-active={active}
-        data-hot={hot}
-        aria-hidden
-      />
-    </>
-  )
+  return <div className="spotlight-layer" data-active={active} aria-hidden />
 }

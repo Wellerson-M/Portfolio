@@ -44,3 +44,9 @@ next-env.d.ts
 /notes
 /DNN
 
+
+# arquivos locais de editor e de agentes de IA
+/.vscode
+/.claude
+AGENTS.md
+CLAUDE.md
