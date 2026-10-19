@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import useMediaQuery from '@/components/ui/useMediaQuery'
 
 /**
- * Efeito unico de mouse do site: um halo ambar suave iluminando a regiao
- * atras do cursor.
+ * Efeito unico de mouse do site: uma luz clara e bem fraca seguindo o
+ * cursor, so pra superficie reagir ao movimento.
  *
  * Nao renderiza em dispositivo sem ponteiro fino (touch) nem quando o usuario
  * pede movimento reduzido.

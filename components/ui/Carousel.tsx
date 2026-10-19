@@ -1,7 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import useMediaQuery from '@/components/ui/useMediaQuery'
 import type { Shot } from '@/lib/projects'
 
 type Props = {
@@ -9,11 +10,11 @@ type Props = {
   shape?: Shape
 }
 
-export type Shape = 'phone' | 'screen' | 'wide'
+export type Shape = 'phone' | 'screen' | 'desk'
 
 /**
  * Cada conjunto de prints tem a proporção do que foi capturado: celular em pé,
- * mockup de sistema em 5:4, print de tela cheia em 16:9. Errar isso deixa
+ * mockup de sistema em 5:4, tela de computador em 16:10. Errar isso deixa
  * tarja sobrando na moldura ou corta a lateral da interface.
  */
 const SHAPES = {
@@ -31,24 +32,29 @@ const SHAPES = {
     sizes: '500px',
     fit: 'object-contain',
   },
-  wide: {
-    stage: 'h-[13rem] sm:h-[19rem] lg:h-[23rem]',
-    slide: 'h-[13rem] w-[23.1rem] sm:h-[19rem] sm:w-[33.8rem] lg:h-[23rem] lg:w-[40.9rem]',
-    step: 62,
-    sizes: '660px',
-    fit: 'object-contain',
+  desk: {
+    stage: 'h-[12.5rem] sm:h-[20rem] lg:h-[30rem]',
+    slide: 'h-[12.5rem] w-[20rem] sm:h-[20rem] sm:w-[32rem] lg:h-[30rem] lg:w-[48rem]',
+    step: 66,
+    sizes: '(min-width: 1024px) 680px, 90vw',
+    fit: 'object-cover',
   },
 } as const
 
 /**
  * Carrossel de três: o do meio nítido e em tamanho cheio, os dois vizinhos
  * menores e desfocados. Clicar num vizinho traz ele pro centro; clicar no
- * centro abre em tela cheia.
+ * centro abre em tela cheia. Passa sozinho enquanto está na tela, e para
+ * quando o mouse está em cima.
  */
 export default function Carousel({ shots, shape = 'phone' }: Props) {
   const total = shots.length
   const [active, setActive] = useState(0)
   const [full, setFull] = useState(false)
+  const [paused, setPaused] = useState(false)
+  const [visible, setVisible] = useState(false)
+  const calm = useMediaQuery('(prefers-reduced-motion: reduce)')
+  const root = useRef<HTMLDivElement>(null)
 
   const go = useCallback(
     (delta: number) => setActive((current) => (current + delta + total) % total),
@@ -74,10 +80,32 @@ export default function Carousel({ shots, shape = 'phone' }: Props) {
     }
   }, [full, go])
 
+  useEffect(() => {
+    const node = root.current
+    if (!node) return
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), {
+      threshold: 0.4,
+    })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!visible || paused || full || calm || total < 2) return
+    const timer = window.setInterval(() => go(1), 4500)
+    return () => window.clearInterval(timer)
+  }, [visible, paused, full, calm, total, go])
+
   const form = SHAPES[shape]
 
   return (
-    <div>
+    <div
+      ref={root}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+    >
       <div
         className={`relative flex items-center justify-center overflow-hidden ${form.stage}`}
       >
@@ -102,8 +130,8 @@ export default function Carousel({ shots, shape = 'phone' }: Props) {
               className="carousel-slide absolute cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
               style={{
                 transform: `translateX(${delta * form.step}%) scale(${center ? 1 : 0.82})`,
-                filter: center ? 'none' : 'blur(3px)',
-                opacity: center ? 1 : 0.45,
+                filter: center ? 'none' : 'blur(4px)',
+                opacity: center ? 1 : 0.4,
                 zIndex: center ? 2 : 1,
               }}
             >
@@ -118,7 +146,6 @@ export default function Carousel({ shots, shape = 'phone' }: Props) {
                   fill
                   sizes={form.sizes}
                   className={form.fit}
-                  priority={index === 0}
                 />
               </span>
             </button>

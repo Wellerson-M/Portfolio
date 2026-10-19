@@ -11,9 +11,10 @@ type Props = {
 }
 
 /** Tamanho em que o site é desenhado antes de ser reduzido para a moldura:
- *  assim ele aparece no layout real de PC ou de celular, e não num meio-termo. */
+ *  assim ele aparece no layout real de PC ou de celular, e não num meio-termo.
+ *  O notebook usa 1280 de largura: com 1440 a redução deixava o texto ilegível. */
 const VIEWPORT = {
-  laptop: { width: 1440, height: 900 },
+  laptop: { width: 1280, height: 800 },
   phone: { width: 390, height: 844 },
 } as const
 
@@ -85,7 +86,7 @@ export default function LiveFrame({ src, title, device, poster }: Props) {
         src={poster}
         alt=""
         fill
-        sizes={device === 'laptop' ? '900px' : '320px'}
+        sizes={device === 'laptop' ? '1100px' : '360px'}
         className={`object-cover object-top transition-opacity duration-700 ${
           loaded ? 'pointer-events-none opacity-0' : 'opacity-100'
         }`}
@@ -108,7 +109,7 @@ export default function LiveFrame({ src, title, device, poster }: Props) {
 
   if (device === 'laptop') {
     return (
-      <div className="mx-auto w-full max-w-4xl px-[4%]">
+      <div className="mx-auto w-full max-w-5xl px-[4%]">
         {/* Tampa: moldura escura fina em volta da tela */}
         <div className="rounded-t-[1.1rem] border border-graphite-700 bg-[#1c1f24] p-[1.4%] pb-[2%] shadow-[0_50px_90px_-50px_rgba(0,0,0,0.95)]">
           <div className="overflow-hidden rounded-[0.3rem]">{content}</div>
@@ -122,7 +123,7 @@ export default function LiveFrame({ src, title, device, poster }: Props) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[300px]">
+    <div className="mx-auto w-full max-w-[340px]">
       <div className="relative rounded-[2.6rem] border border-graphite-700 bg-[#1c1f24] p-2.5 shadow-[0_36px_80px_-32px_rgba(0,0,0,0.9)]">
         <div className="overflow-hidden rounded-[2.1rem]">{content}</div>
         <div className="pointer-events-none absolute top-4 left-1/2 h-1.5 w-14 -translate-x-1/2 rounded-full bg-black/60" />

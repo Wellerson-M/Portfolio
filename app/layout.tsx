@@ -17,12 +17,13 @@ const jetbrains = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Wellerson Meredyk · Engenharia de Software',
+  metadataBase: new URL('https://wellersonmeredyk.vercel.app'),
+  title: 'Wellerson Meredyk · Desenvolvedor web',
   description:
-    'Portfólio de Wellerson Meredyk, estudante de Engenharia de Software em Joinville (SC). Projetos web com demonstrações para testar.',
+    'Portfólio de Wellerson Meredyk, desenvolvedor web em Joinville (SC). Sites e sistemas, com demonstrações para testar.',
   openGraph: {
-    title: 'Wellerson Meredyk · Engenharia de Software',
-    description: 'Projetos web com demonstrações para testar.',
+    title: 'Wellerson Meredyk · Desenvolvedor web',
+    description: 'Sites e sistemas web, com demonstrações para testar.',
     type: 'website',
     locale: 'pt_BR',
   },
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       className={`${inter.variable} ${jetbrains.variable} h-full antialiased`}
     >
       <body className="min-h-full">
+        <div className="backdrop" aria-hidden />
         <Spotlight />
         <a
           href="#sobre"

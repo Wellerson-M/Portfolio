@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import useMediaQuery from '@/components/ui/useMediaQuery'
 import { contact } from '@/lib/projects'
 
-const LINE = 'Desenvolvimento web, APIs e banco de dados.'
+const LINE = 'Sites e sistemas web, do layout ao banco de dados.'
 
 export default function Hero() {
   const calm = useMediaQuery('(prefers-reduced-motion: reduce)')
@@ -33,7 +33,7 @@ export default function Hero() {
     >
       <div className="hero-in max-w-5xl">
         <p className="font-mono text-xs tracking-widest text-amber-400">
-          ENGENHARIA DE SOFTWARE · JOINVILLE, SC
+          DESENVOLVEDOR WEB · JOINVILLE, SC
         </p>
 
         <h1 className="mt-6 font-mono text-[length:var(--text-hero)] leading-[0.9] font-medium tracking-tighter text-ink-100">
@@ -56,13 +56,6 @@ export default function Hero() {
             className="rounded-full bg-amber-400 px-5 py-2.5 font-mono text-sm text-graphite-950 transition-colors hover:bg-amber-300"
           >
             ver projetos
-          </a>
-          <a
-            href={contact.cv}
-            download
-            className="rounded-full border border-graphite-700 px-5 py-2.5 font-mono text-sm text-ink-200 transition-colors hover:border-amber-400/70 hover:text-amber-200"
-          >
-            baixar currículo
           </a>
           <a
             href={contact.github}

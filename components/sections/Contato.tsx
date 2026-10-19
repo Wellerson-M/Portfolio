@@ -22,7 +22,7 @@ export default function Contato() {
 
         <Reveal delay={80} className="mt-12">
           <p className="max-w-xl text-lg text-ink-200">
-            Para falar sobre algum projeto daqui, ou sobre trabalho, é só chamar.
+            Precisa de um site ou sistema, ou quer conversar sobre trabalho? É só chamar.
           </p>
         </Reveal>
 
@@ -58,11 +58,10 @@ export default function Contato() {
           <a
             href={contact.cv}
             download
-            className="inline-flex items-center gap-2 rounded border border-amber-500/60 bg-amber-500/5 px-4 py-2.5 font-mono text-sm text-amber-300 transition-colors hover:border-amber-400 hover:bg-amber-500/10 hover:text-amber-200"
+            className="inline-flex items-center gap-2 font-mono text-sm text-ink-400 transition-colors hover:text-amber-300"
           >
             <span aria-hidden>&#8595;</span>
-            baixar CV
-            <span className="text-ink-500">pdf</span>
+            currículo em PDF
           </a>
         </Reveal>
 
