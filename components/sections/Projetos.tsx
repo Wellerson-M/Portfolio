@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Expand from '@/components/ui/Expand'
 import ProjectMedia from '@/components/ui/ProjectMedia'
 import Reveal from '@/components/ui/Reveal'
@@ -148,6 +149,23 @@ function MoreRow({ item }: { item: MoreItem }) {
       <div>
         <p className="text-sm text-ink-300">{item.summary}</p>
         <p className="mt-1 font-mono text-xs text-ink-500">{item.stack.join(' · ')}</p>
+        {item.image && (
+          <a
+            href={item.image.src}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group mt-4 block max-w-md overflow-hidden rounded-lg border border-graphite-800"
+          >
+            <Image
+              src={item.image.src}
+              alt={item.image.alt}
+              width={1507}
+              height={862}
+              sizes="448px"
+              className="h-auto w-full transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+            />
+          </a>
+        )}
       </div>
       <div className="sm:text-right">
         {item.repo && <ExternalLink href={item.repo}>código</ExternalLink>}

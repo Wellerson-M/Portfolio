@@ -37,6 +37,8 @@ export type Project = {
   demo?: Demo
   shots: Shot[]
   shotShape: Shape
+  /** Aviso curto logo acima dos prints (ex.: quando são mockups). */
+  shotsNote?: string
 }
 
 export type MoreItem = {
@@ -45,6 +47,7 @@ export type MoreItem = {
   summary: string
   stack: string[]
   repo?: string
+  image?: Shot
 }
 
 /* ------------------------------------------------------------------ */
@@ -67,10 +70,10 @@ export const featured: Project[] = [
   {
     slug: 'sigof',
     name: 'SIGOF',
-    note: 'TCC · em desenvolvimento',
+    note: 'TCC · em testes na empresa',
     tagline: 'Gestão de ocorrências de frete para transportadoras',
     summary:
-      'Pedidos de correção de CT-e, como troca de pagador, reversão e ajuste fiscal, atualmente chegam de forma desorganizada. O SIGOF reúne esse fluxo num lugar só, com histórico do começo ao fim. É um problema que acompanho de perto no trabalho.',
+      'Pedidos de correção de CT-e, como troca de pagador, reversão e ajuste fiscal, atualmente chegam de forma desorganizada. O SIGOF reúne esse fluxo num lugar só, com histórico do começo ao fim. É um problema que vejo de perto no trabalho, e o sistema está em fase de testes e aprimoramento dentro da empresa.',
     points: [
       'Protocolo por empresa e fila por prioridade',
       'Prazo de atendimento contado em horário útil',
@@ -94,6 +97,7 @@ export const featured: Project[] = [
     stack: ['TypeScript', 'Node.js', 'Express', 'PostgreSQL', 'Prisma', 'Next.js', 'Docker'],
     repo: 'https://github.com/Wellerson-M/SIGOF',
     shotShape: 'screen',
+    shotsNote: 'As telas abaixo são um mockup, feito para planejar a interface.',
     shots: [
       { src: '/assets/sigof/mockups/04-dashboard-analista.png', alt: 'Fila de atendimento do analista, ordenada por prioridade' },
       { src: '/assets/sigof/mockups/05-detalhes-solicitacao.png', alt: 'Solicitação aberta com histórico e conversa' },
@@ -282,6 +286,7 @@ export const more: MoreItem[] = [
     summary: 'Lê as músicas curtidas pelo login do Spotify, classifica a vibe de cada faixa com IA e sugere playlists, que podem ser criadas direto na conta.',
     stack: ['Next.js', 'TypeScript', 'Prisma', 'Spotify API', 'OpenAI'],
     repo: 'https://github.com/Wellerson-M/SpotifyFilters',
+    image: { src: '/assets/spotifyfilters/sugestoes.webp', alt: 'Playlists sugeridas com nome, capa e número de faixas' },
   },
   {
     name: 'Triagem de helpdesk',

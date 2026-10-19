@@ -22,7 +22,7 @@ export default function Contato() {
 
         <Reveal delay={80} className="mt-12">
           <p className="max-w-xl text-lg text-ink-200">
-            Precisa de um site ou sistema, ou quer conversar sobre trabalho? É só chamar.
+            Tem um projeto em mente ou uma vaga aberta? Me manda uma mensagem.
           </p>
         </Reveal>
 
