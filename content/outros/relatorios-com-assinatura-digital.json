@@ -1,0 +1,13 @@
+{
+  "name": "Relatórios com assinatura digital",
+  "order": 40,
+  "context": "Segurança da Informação",
+  "summary": "Envio de relatórios assinados digitalmente, com login e rotas protegidas.",
+  "stack": [
+    "Node.js",
+    "Next.js",
+    "MongoDB",
+    "JWT"
+  ],
+  "repo": "https://github.com/Wellerson-M/sistemaRelatorios"
+}

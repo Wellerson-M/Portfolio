@@ -1,10 +1,10 @@
 import Reveal from '@/components/ui/Reveal'
 import { SectionHeader } from '@/components/ui/bits'
-import { contact } from '@/lib/projects'
+import type { Contact } from '@/lib/projects'
 
 const YEAR = new Date().getFullYear()
 
-export default function Contato() {
+export default function Contato({ contact }: { contact: Contact }) {
   const links = [
     { label: 'GitHub', value: '@Wellerson-M', href: contact.github },
     contact.linkedin

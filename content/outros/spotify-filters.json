@@ -1,0 +1,16 @@
+{
+  "name": "Spotify Filters",
+  "order": 10,
+  "context": "Projeto pessoal",
+  "summary": "Lê as músicas curtidas pelo login do Spotify, classifica a vibe de cada faixa com IA e sugere playlists, que podem ser criadas direto na conta.",
+  "stack": [
+    "Next.js",
+    "TypeScript",
+    "Prisma",
+    "Spotify API",
+    "OpenAI"
+  ],
+  "repo": "https://github.com/Wellerson-M/SpotifyFilters",
+  "image": "/assets/outros/spotify-filters/sugestoes.webp",
+  "imageAlt": "Playlists sugeridas com nome, capa e número de faixas"
+}

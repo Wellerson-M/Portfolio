@@ -1,0 +1,9 @@
+{
+  "name": "Leilão de entregas",
+  "order": 30,
+  "context": "Inteligência Artificial",
+  "summary": "Escolhe as entregas mais lucrativas do dia comparando busca A*, Simulated Annealing e algoritmo genético.",
+  "stack": [
+    "Python"
+  ]
+}

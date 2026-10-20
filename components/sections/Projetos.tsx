@@ -3,9 +3,9 @@ import Expand from '@/components/ui/Expand'
 import ProjectMedia from '@/components/ui/ProjectMedia'
 import Reveal from '@/components/ui/Reveal'
 import { ExternalLink, SectionHeader, StackList } from '@/components/ui/bits'
-import { featured, more, type MoreItem, type Project } from '@/lib/projects'
+import type { MoreItem, Project } from '@/lib/projects'
 
-export default function Projetos() {
+export default function Projetos({ featured, more }: { featured: Project[]; more: MoreItem[] }) {
   return (
     <section className="border-t border-graphite-850 px-6 py-24 sm:px-10 lg:px-16 lg:py-32">
       <div className="mx-auto max-w-6xl">

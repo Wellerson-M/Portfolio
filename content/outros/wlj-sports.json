@@ -1,0 +1,11 @@
+{
+  "name": "WLJ Sports",
+  "order": 70,
+  "context": "Técnico em Desenvolvimento de Sistemas, 2022",
+  "summary": "Meu primeiro sistema: loja com cadastro, carrinho e painel administrativo.",
+  "stack": [
+    "PHP",
+    "MySQL"
+  ],
+  "repo": "https://github.com/Wellerson-M/WLJ-Sports"
+}

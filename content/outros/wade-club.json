@@ -1,0 +1,11 @@
+{
+  "name": "Wade Club",
+  "order": 60,
+  "context": "Projeto de extensão, em dupla",
+  "summary": "Loja virtual para uma marca local de roupas que vendia só pelo Instagram.",
+  "stack": [
+    "PHP",
+    "MySQL"
+  ],
+  "repo": "https://github.com/Wellerson-M/WadeClub"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Climax",
+  "order": 50,
+  "context": "IoT, em dupla",
+  "summary": "Sensor de temperatura e umidade com ESP32 enviando leituras por MQTT para um painel web.",
+  "stack": [
+    "ESP32",
+    "C++",
+    "MQTT",
+    "JavaScript"
+  ],
+  "repo": "https://github.com/Wellerson-M/Climax"
+}

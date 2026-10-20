@@ -1,0 +1,12 @@
+{
+  "name": "Triagem de helpdesk",
+  "order": 20,
+  "context": "Inteligência Artificial",
+  "summary": "Classifica o tom dos chamados, define a prioridade e distribui entre os técnicos.",
+  "stack": [
+    "Python",
+    "scikit-learn",
+    "lógica fuzzy",
+    "algoritmo genético"
+  ]
+}

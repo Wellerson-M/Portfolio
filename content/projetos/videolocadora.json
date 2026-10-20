@@ -1,0 +1,77 @@
+{
+  "name": "Videolocadora",
+  "order": 50,
+  "note": "Bootcamp TOTVS · projeto final",
+  "tagline": "Sistema de locadora em Progress OpenEdge",
+  "summary": "Cadastros de cidades, filmes e clientes e o registro de aluguéis, com relatórios e exportação dos dados. Feito no bootcamp de Progress da TOTVS, a linguagem por trás do ERP Datasul.",
+  "points": [],
+  "details": [
+    {
+      "title": "Como funciona",
+      "text": "Cada cadastro tem navegação entre registros, inclusão, alteração e exclusão. Um aluguel reúne vários filmes, com quantidade e valor, e o total é calculado na hora. Os filmes são escolhidos numa lista dos cadastrados."
+    },
+    {
+      "title": "Regras de integridade",
+      "text": "O sistema não deixa excluir um filme que aparece em algum aluguel, nem um cliente que tem aluguéis. Ao excluir um aluguel, os itens são apagados junto, numa única transação: ou sai tudo, ou nada."
+    },
+    {
+      "title": "Relatórios",
+      "text": "Relatórios de clientes e de aluguéis em texto, exportação de cada cadastro e dos aluguéis completos em JSON."
+    }
+  ],
+  "code": {
+    "file": "cadAlugueis.p",
+    "lines": "IF lResp THEN DO TRANSACTION ON ERROR UNDO, LEAVE:\n    FOR EACH bfItem EXCLUSIVE-LOCK\n        WHERE bfItem.CodAluguel = Alugueis.CodAluguel:\n        DELETE bfItem.\n    END.\n\n    FIND CURRENT Alugueis EXCLUSIVE-LOCK NO-ERROR.\n    IF AVAIL Alugueis THEN DELETE Alugueis.\nEND."
+  },
+  "stack": [
+    "Progress 4GL",
+    "OpenEdge"
+  ],
+  "repo": "https://github.com/Wellerson-M/VideoLocadora",
+  "demo": {
+    "discriminant": false
+  },
+  "shotShape": "desk",
+  "shots": [
+    {
+      "src": "/assets/projetos/videolocadora/07-alugueis.webp",
+      "alt": "Aluguel com vários filmes e total calculado"
+    },
+    {
+      "src": "/assets/projetos/videolocadora/08-selecao-filme.webp",
+      "alt": "Escolha do filme para o aluguel"
+    },
+    {
+      "src": "/assets/projetos/videolocadora/03-filmes.webp",
+      "alt": "Cadastro de filmes"
+    },
+    {
+      "src": "/assets/projetos/videolocadora/04-filme-em-uso.webp",
+      "alt": "Aviso ao tentar excluir um filme que está em aluguel"
+    },
+    {
+      "src": "/assets/projetos/videolocadora/05-clientes.webp",
+      "alt": "Cadastro de clientes"
+    },
+    {
+      "src": "/assets/projetos/videolocadora/06-cliente-com-aluguel.webp",
+      "alt": "Aviso ao tentar excluir um cliente com aluguéis"
+    },
+    {
+      "src": "/assets/projetos/videolocadora/02-cidades.webp",
+      "alt": "Cadastro de cidades"
+    },
+    {
+      "src": "/assets/projetos/videolocadora/01-menu.webp",
+      "alt": "Menu principal"
+    },
+    {
+      "src": "/assets/projetos/videolocadora/09-relatorio-clientes.webp",
+      "alt": "Relatório de clientes"
+    },
+    {
+      "src": "/assets/projetos/videolocadora/10-exportacao-json.webp",
+      "alt": "Aluguéis exportados em JSON"
+    }
+  ]
+}

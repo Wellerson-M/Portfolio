@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import useMediaQuery from '@/components/ui/useMediaQuery'
-import { contact } from '@/lib/projects'
+import type { Contact } from '@/lib/projects'
 
-const LINE = 'Sites e sistemas web, do layout ao banco de dados.'
-
-export default function Hero() {
+export default function Hero({ line, contact }: { line: string; contact: Contact }) {
   const calm = useMediaQuery('(prefers-reduced-motion: reduce)')
   const [typed, setTyped] = useState('')
 
@@ -17,14 +15,14 @@ export default function Hero() {
     const timer = window.setInterval(
       () => {
         index += 1
-        setTyped(LINE.slice(0, index))
-        if (index >= LINE.length) window.clearInterval(timer)
+        setTyped(line.slice(0, index))
+        if (index >= line.length) window.clearInterval(timer)
       },
       calm ? 14 : 38,
     )
 
     return () => window.clearInterval(timer)
-  }, [calm])
+  }, [calm, line])
 
   return (
     <section
@@ -41,7 +39,7 @@ export default function Hero() {
 
         <p
           className="mt-8 min-h-[1.85rem] max-w-2xl border-l-2 border-amber-500/60 pl-5 text-lg text-ink-200 sm:text-xl"
-          aria-label={LINE}
+          aria-label={line}
         >
           <span aria-hidden>{typed}</span>
           <span className="caret" aria-hidden />
@@ -62,14 +60,16 @@ export default function Hero() {
           >
             github ↗
           </a>
-          <a
-            href={contact.linkedin}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3 py-2.5 font-mono text-sm text-ink-400 transition-colors hover:text-amber-300"
-          >
-            linkedin ↗
-          </a>
+          {contact.linkedin && (
+            <a
+              href={contact.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-2.5 font-mono text-sm text-ink-400 transition-colors hover:text-amber-300"
+            >
+              linkedin ↗
+            </a>
+          )}
         </div>
       </div>
 

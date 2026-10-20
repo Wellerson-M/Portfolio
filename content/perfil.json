@@ -1,0 +1,22 @@
+{
+  "line": "Sites e sistemas web, do layout ao banco de dados.",
+  "about": [
+    "Sou desenvolvedor web em Joinville (SC) e estudo Engenharia de Software na Católica SC. Antes disso, fiz o técnico em Desenvolvimento de Sistemas no SESI SENAI.",
+    "Faço sites e sistemas: desde uma página para apresentar um negócio até aplicações com login, banco de dados e painel administrativo. A maioria dos projetos abaixo está no ar e dá para testar aqui mesmo.",
+    "Também trabalho na operação de uma transportadora, e foi de lá que veio a ideia do SIGOF, meu TCC."
+  ],
+  "skills": [
+    "TypeScript",
+    "JavaScript",
+    "React",
+    "Next.js",
+    "Node.js",
+    "PostgreSQL",
+    "MongoDB",
+    "Progress 4GL",
+    "Git"
+  ],
+  "email": "wellersonmeredyk1@gmail.com",
+  "github": "https://github.com/Wellerson-M",
+  "linkedin": "https://www.linkedin.com/in/wellerson-meredyk-a2b38b1ab/"
+}

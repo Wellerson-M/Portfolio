@@ -1,0 +1,69 @@
+{
+  "name": "SIGOF",
+  "order": 10,
+  "note": "TCC · em testes na empresa",
+  "tagline": "Gestão de ocorrências de frete para transportadoras",
+  "summary": "Pedidos de correção de CT-e, como troca de pagador, reversão e ajuste fiscal, atualmente chegam de forma desorganizada. O SIGOF reúne esse fluxo num lugar só, com histórico do começo ao fim. É um problema que vejo de perto no trabalho, e o sistema está em fase de testes e aprimoramento dentro da empresa.",
+  "points": [
+    "Protocolo por empresa e fila por prioridade",
+    "Prazo de atendimento contado em horário útil",
+    "Alerta de pedido duplicado e anexos no chamado",
+    "Acesso por perfil, com os dados isolados por empresa"
+  ],
+  "details": [
+    {
+      "title": "Como funciona",
+      "text": "Quem precisa da correção abre uma solicitação com o CT-e e a nota fiscal, e pode anexar PDF, imagem ou XML. O sistema gera o protocolo e avisa se já existe um pedido igual em aberto. O analista atende uma fila ordenada por prioridade e prazo, conversa com o solicitante dentro da própria solicitação e registra a solução. O supervisor acompanha os indicadores e exporta os dados em CSV."
+    },
+    {
+      "title": "Por dentro",
+      "text": "API em Node.js com Express e TypeScript, banco PostgreSQL com Prisma e telas em Next.js. O prazo é contado em minutos úteis, respeitando o expediente e o fuso de cada empresa, e fica pausado enquanto o pedido aguarda documento. Várias empresas usam o mesmo sistema, e cada uma só enxerga os próprios dados."
+    },
+    {
+      "title": "Cuidados",
+      "text": "Login com sessão em cookie protegido, bloqueio após tentativas erradas, proteção contra CSRF e trilha de auditoria. O código tem testes automatizados que rodam no GitHub Actions a cada mudança, e o ambiente sobe com Docker."
+    }
+  ],
+  "code": {},
+  "stack": [
+    "TypeScript",
+    "Node.js",
+    "Express",
+    "PostgreSQL",
+    "Prisma",
+    "Next.js",
+    "Docker"
+  ],
+  "repo": "https://github.com/Wellerson-M/SIGOF",
+  "demo": {
+    "discriminant": false
+  },
+  "shotShape": "screen",
+  "shotsNote": "As telas abaixo são um mockup, feito para planejar a interface.",
+  "shots": [
+    {
+      "src": "/assets/projetos/sigof/mockups/04-dashboard-analista.png",
+      "alt": "Fila de atendimento do analista, ordenada por prioridade"
+    },
+    {
+      "src": "/assets/projetos/sigof/mockups/05-detalhes-solicitacao.png",
+      "alt": "Solicitação aberta com histórico e conversa"
+    },
+    {
+      "src": "/assets/projetos/sigof/mockups/03-nova-solicitacao.png",
+      "alt": "Formulário de nova solicitação"
+    },
+    {
+      "src": "/assets/projetos/sigof/mockups/06-dashboard-gerencial.png",
+      "alt": "Painel gerencial com indicadores de atendimento"
+    },
+    {
+      "src": "/assets/projetos/sigof/mockups/02-dashboard-solicitante.png",
+      "alt": "Painel do solicitante com as próprias solicitações"
+    },
+    {
+      "src": "/assets/projetos/sigof/mockups/01-login.png",
+      "alt": "Tela de login"
+    }
+  ]
+}

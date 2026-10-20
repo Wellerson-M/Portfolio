@@ -1,8 +1,6 @@
 import Reveal from '@/components/ui/Reveal'
 import { SectionHeader, StackList } from '@/components/ui/bits'
-import { about, skills } from '@/lib/projects'
-
-export default function Sobre() {
+export default function Sobre({ about, skills }: { about: string[]; skills: string[] }) {
   return (
     <section className="border-t border-graphite-850 px-6 py-24 sm:px-10 lg:px-16 lg:py-32">
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:gap-20">

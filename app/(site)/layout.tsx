@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
+import GridField from '@/components/ui/GridField'
 import SectionNav from '@/components/ui/SectionNav'
 import Spotlight from '@/components/ui/Spotlight'
-import './globals.css'
+import '../globals.css'
 
 const inter = Inter({
   variable: '--font-inter',
@@ -36,7 +37,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       className={`${inter.variable} ${jetbrains.variable} h-full antialiased`}
     >
       <body className="min-h-full">
-        <div className="backdrop" aria-hidden />
+        <GridField />
         <Spotlight />
         <a
           href="#sobre"

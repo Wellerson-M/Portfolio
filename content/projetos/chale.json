@@ -1,0 +1,71 @@
+{
+  "name": "Chalé Mirante dos Anjos",
+  "order": 40,
+  "note": "proposta de site · freelance",
+  "tagline": "Site para uma hospedagem em Rodeio (SC)",
+  "summary": "Site para um chalé anunciado no Airbnb, com fotos, guia da região, avaliações dos hóspedes e reserva. Foi feito como proposta para a proprietária.",
+  "points": [],
+  "details": [
+    {
+      "title": "A ideia",
+      "text": "Dar ao chalé um endereço próprio, que possa ser divulgado fora do Airbnb, e levar quem chega direto às fotos, às avaliações e à reserva. Escolhendo as datas no calendário, o botão abre o Airbnb já com elas preenchidas."
+    },
+    {
+      "title": "Guia do Vale",
+      "text": "Um guia em formato de livro, que se folheia na tela, com os lugares que a anfitriã indica na região. Cada página tem o mapa, a distância de carro e um botão que abre a rota no celular."
+    },
+    {
+      "title": "Por dentro",
+      "text": "HTML, CSS e JavaScript puro, sem framework. Cada foto existe em três tamanhos, e o navegador baixa só o que a tela precisa, então o site continua leve no celular. Tem prévia para WhatsApp e mapa do site para buscadores."
+    }
+  ],
+  "code": {},
+  "stack": [
+    "HTML",
+    "CSS",
+    "JavaScript"
+  ],
+  "demo": {
+    "discriminant": true,
+    "value": {
+      "src": "https://mirantedosanjos.netlify.app/",
+      "device": "laptop",
+      "poster": "/assets/projetos/chale/poster.webp"
+    }
+  },
+  "shotShape": "desk",
+  "shots": [
+    {
+      "src": "/assets/projetos/chale/01-inicio.webp",
+      "alt": "Início do site com a vista do chalé"
+    },
+    {
+      "src": "/assets/projetos/chale/02-destaques.webp",
+      "alt": "Destaques do chalé"
+    },
+    {
+      "src": "/assets/projetos/chale/03-galeria.webp",
+      "alt": "Galeria de fotos por ambiente"
+    },
+    {
+      "src": "/assets/projetos/chale/04-guia.webp",
+      "alt": "Capa do Guia do Vale"
+    },
+    {
+      "src": "/assets/projetos/chale/08-livro.webp",
+      "alt": "Guia do Vale aberto, com o sumário"
+    },
+    {
+      "src": "/assets/projetos/chale/05-mapa.webp",
+      "alt": "Mapa com os lugares da região"
+    },
+    {
+      "src": "/assets/projetos/chale/06-avaliacoes.webp",
+      "alt": "Avaliações dos hóspedes"
+    },
+    {
+      "src": "/assets/projetos/chale/07-reserva.webp",
+      "alt": "Calendário de reserva"
+    }
+  ]
+}

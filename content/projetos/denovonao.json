@@ -1,0 +1,58 @@
+{
+  "name": "De Novo Não",
+  "order": 30,
+  "note": "pessoal · no ar",
+  "tagline": "Avaliações de restaurantes para não repetir pedido ruim",
+  "summary": "Cada ida a um restaurante vira um registro com nota, impressões e avisos, e o lugar ganha um histórico. As avaliações podem ser públicas ou privadas e, sem internet, ficam salvas no aparelho até a conexão voltar.",
+  "points": [],
+  "details": [
+    {
+      "title": "Como funciona",
+      "text": "Cada visita guarda a nota, a opinião de cada pessoa do casal, avisos como \"veio frio\" e quanto custou. Com várias visitas ao mesmo lugar, o app mostra a média e a faixa de preço. Dá para buscar por nome ou local e filtrar pela nota."
+    },
+    {
+      "title": "Painel administrativo",
+      "text": "Moderação das avaliações, lixeira com restauração, registro de quem fez o quê (com IP), suspensão de contas, encerramento de sessões e link de troca de senha para quem esqueceu."
+    },
+    {
+      "title": "Por dentro",
+      "text": "Frontend em Next.js na Vercel e API em Express com TypeScript, com banco MongoDB. Login com JWT, limite de tentativas e fotos guardadas no Cloudinary. Funciona como aplicativo instalável (PWA)."
+    }
+  ],
+  "code": {},
+  "stack": [
+    "Next.js",
+    "TypeScript",
+    "Express",
+    "MongoDB",
+    "JWT"
+  ],
+  "repo": "https://github.com/Wellerson-M/DeNovoNao",
+  "demo": {
+    "discriminant": true,
+    "value": {
+      "src": "https://de-novo-nao.vercel.app/",
+      "device": "phone",
+      "poster": "/assets/projetos/denovonao/poster.webp"
+    }
+  },
+  "shotShape": "phone",
+  "shots": [
+    {
+      "src": "/assets/projetos/denovonao/01-inicio.webp",
+      "alt": "Tela inicial com busca e filtro por nota"
+    },
+    {
+      "src": "/assets/projetos/denovonao/02-avaliacao.webp",
+      "alt": "Avaliação com a opinião de cada pessoa"
+    },
+    {
+      "src": "/assets/projetos/denovonao/03-feed.webp",
+      "alt": "Lista de avaliações"
+    },
+    {
+      "src": "/assets/projetos/denovonao/04-login.webp",
+      "alt": "Tela de login"
+    }
+  ]
+}

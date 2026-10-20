@@ -1,0 +1,75 @@
+{
+  "name": "Grafite Notas",
+  "order": 20,
+  "note": "uso pessoal · no ar",
+  "tagline": "Bloco de notas para o celular que funciona sem internet",
+  "summary": "O app de notas que uso no dia a dia: tarefas, agenda, ligação entre notas e um assistente com IA. Tudo fica salvo no aparelho e sincroniza quando a conexão volta. A demonstração abre com notas fictícias, guardadas só no seu navegador.",
+  "points": [],
+  "details": [
+    {
+      "title": "Como funciona",
+      "text": "Toda nota é gravada primeiro no próprio aparelho, então o app abre e salva mesmo sem internet. Quando a conexão volta, as notas alteradas sobem para o servidor e chegam aos outros aparelhos. Ele pode ser instalado na tela inicial como um aplicativo."
+    },
+    {
+      "title": "Recursos",
+      "text": "Tarefas com lembrete, agenda com calendário, ligação entre notas e um grafo que mostra essas conexões, histórico de versões de cada nota e um cofre com senha, cifrado no aparelho. O assistente lê as notas, responde perguntas e cria notas novas por texto ou voz."
+    },
+    {
+      "title": "Por dentro",
+      "text": "Next.js com rotas de API na Vercel. No aparelho, os dados ficam no IndexedDB; na nuvem, no MongoDB. A chave da IA (Gemini) fica só no servidor, e o modo demonstração usa um banco separado no navegador, sem tocar nos dados reais."
+    }
+  ],
+  "code": {},
+  "stack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "IndexedDB",
+    "MongoDB",
+    "PWA"
+  ],
+  "repo": "https://github.com/Wellerson-M/Notes",
+  "demo": {
+    "discriminant": true,
+    "value": {
+      "src": "https://notes-ten-tau-15.vercel.app/?demo",
+      "device": "phone",
+      "poster": "/assets/projetos/notes/poster.webp"
+    }
+  },
+  "shotShape": "phone",
+  "shots": [
+    {
+      "src": "/assets/projetos/notes/01-notas.webp",
+      "alt": "Lista de notas com filtros e tarefas"
+    },
+    {
+      "src": "/assets/projetos/notes/02-nota-conexoes.webp",
+      "alt": "Nota com sugestões de conexão com outras notas"
+    },
+    {
+      "src": "/assets/projetos/notes/03-nota-links.webp",
+      "alt": "Nota com link para outra nota"
+    },
+    {
+      "src": "/assets/projetos/notes/04-agenda.webp",
+      "alt": "Agenda com calendário do mês"
+    },
+    {
+      "src": "/assets/projetos/notes/05-grafo.webp",
+      "alt": "Grafo de conexões entre as notas"
+    },
+    {
+      "src": "/assets/projetos/notes/06-assistente.webp",
+      "alt": "Assistente com IA"
+    },
+    {
+      "src": "/assets/projetos/notes/07-vault.webp",
+      "alt": "Cofre de notas com senha"
+    },
+    {
+      "src": "/assets/projetos/notes/08-temas.webp",
+      "alt": "Configurações com escolha de tema"
+    }
+  ]
+}
