@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react'
 import useMediaQuery from '@/components/ui/useMediaQuery'
 
 const CELL = 24
-const BACK_CELL = 96
 
 // Física da malha: cada nó tem uma mola fraca até o lugar de origem e molas
 // fortes até os vizinhos, então ela estica como tecido antes de voltar.
@@ -26,10 +25,16 @@ const REGROW_TIME = 2.6
 const LENS_RADIUS = 170
 const LENS_PUSH = 6
 const LENS_IDLE = 1500
-const PARALLAX = 0.018
 
 const LINE = 'rgba(78, 84, 95, 0.28)'
-const BACK_LINE = 'rgba(78, 84, 95, 0.13)'
+
+// Camadas de trás, da mais funda pra mais rasa. A malha da frente rola junto
+// com a página; estas rolam mais devagar, correm contra o cursor e seguem só
+// um pedaço do puxão, e é essa diferença de velocidade que dá profundidade.
+const LAYERS = [
+  { cell: 192, line: 'rgba(78, 84, 95, 0.09)', scroll: 0.18, mouse: 0.014, pull: 0.1 },
+  { cell: 96, line: 'rgba(78, 84, 95, 0.14)', scroll: 0.45, mouse: 0.034, pull: 0.3 },
+]
 
 // Arrastar só começa onde não há nada: fora de links, botões, mídia, texto e
 // superfícies com fundo próprio (cartões, barra de navegação).
@@ -61,7 +66,8 @@ function isBlank(target: EventTarget | null, x: number, y: number) {
 /**
  * Fundo de papel milimetrado desenhado em canvas. O cursor faz a grade abaular
  * de leve, clicar no vazio solta uma onda e arrastar puxa a malha, que rasga
- * se for longe demais e se costura sozinha depois.
+ * se for longe demais e se costura sozinha depois. A malha rola com a página
+ * e duas grades mais largas atrás rolam mais devagar, em paralaxe.
  *
  * Sem ponteiro fino ou com movimento reduzido, fica só a grade em CSS.
  */
@@ -103,8 +109,18 @@ export default function GridField() {
 
     const pointer = { x: -9999, y: -9999, inside: false, moved: 0 }
     const lens = { x: -9999, y: -9999, s: 0 }
+    // Puxão suavizado que as camadas de trás seguem (e soltam devagar).
+    const pull = { x: 0, y: 0 }
+    // Ponto do clique em coordenadas da malha, não da tela.
     let drag: { x: number; y: number; moved: boolean } | null = null
     let raf = 0
+
+    // A física roda num referencial preso ao documento: a malha está em
+    // "base" e é desenhada "o" pixels acima, com o sempre menor que uma célula.
+    // Quando a rolagem passa de uma célula, as linhas do array andam uma
+    // posição e entra uma linha nova, em repouso, na borda.
+    let base = 0
+    let o = 0
 
     const build = () => {
       dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -131,6 +147,8 @@ export default function GridField() {
       gx = new Float32Array(n)
       gy = new Float32Array(n)
       torn = 0
+      base = Math.floor(window.scrollY / CELL) * CELL
+      o = window.scrollY - base
 
       for (let j = 0; j < rows; j++) {
         for (let i = 0; i < cols; i++) {
@@ -140,6 +158,55 @@ export default function GridField() {
           ry[k] = py[k] = (j - 1) * CELL + 0.5
         }
       }
+    }
+
+    const rest = (from: number, to: number) => {
+      for (let k = from; k < to; k++) {
+        px[k] = rx[k]
+        py[k] = ry[k]
+        vx[k] = vy[k] = grab[k] = 0
+        gx[k] = rx[k]
+        gy[k] = ry[k]
+        right[k] = down[k] = 1
+      }
+    }
+
+    const shift = (dir: 1 | -1) => {
+      const n = cols * rows
+      const moving = [px, py, vx, vy, right, down, grab, gx, gy]
+      if (dir === 1) {
+        for (const a of moving) a.copyWithin(0, cols)
+        for (let k = 0; k < n - cols; k++) {
+          py[k] -= CELL
+          gy[k] -= CELL
+        }
+        rest(n - cols, n)
+      } else {
+        for (const a of moving) a.copyWithin(cols, 0, n - cols)
+        for (let k = cols; k < n; k++) {
+          py[k] += CELL
+          gy[k] += CELL
+        }
+        rest(0, cols)
+      }
+      if (drag) drag.y -= dir * CELL
+    }
+
+    const sync = () => {
+      const sy = window.scrollY
+      const d = Math.floor((sy - base) / CELL)
+      if (d !== 0) {
+        if (Math.abs(d) >= rows) {
+          rest(0, cols * rows)
+          drag = null
+        } else {
+          for (let s = 0; s < Math.abs(d); s++) shift(d > 0 ? 1 : -1)
+        }
+        base += d * CELL
+        torn = 0
+        for (const health of [right, down]) for (const v of health) if (v < 1) torn++
+      }
+      o = sy - base
     }
 
     const spring = (a: number, b: number, health: Float32Array, ax: Float32Array, ay: Float32Array) => {
@@ -184,7 +251,7 @@ export default function GridField() {
       }
 
       const ox = drag ? pointer.x - drag.x : 0
-      const oy = drag ? pointer.y - drag.y : 0
+      const oy = drag ? pointer.y + o - drag.y : 0
 
       let restless = false
       for (let k = 0; k < n; k++) {
@@ -222,23 +289,32 @@ export default function GridField() {
       ctx.clearRect(0, 0, w, h)
       ctx.lineWidth = 1
 
-      // Camada de trás: grade larga e mais apagada, que corre um pouco contra
-      // o cursor. É ela que dá a sensação de profundidade.
-      const ox = lens.x > -999 ? (lens.x - w / 2) * -PARALLAX : 0
-      const oy = lens.y > -999 ? (lens.y - h / 2) * -PARALLAX : 0
-      ctx.beginPath()
-      const bx = (((ox % BACK_CELL) + BACK_CELL) % BACK_CELL) - BACK_CELL + 0.5
-      const by = (((oy % BACK_CELL) + BACK_CELL) % BACK_CELL) - BACK_CELL + 0.5
-      for (let x = bx; x < w + BACK_CELL; x += BACK_CELL) {
-        ctx.moveTo(x, 0)
-        ctx.lineTo(x, h)
+      const mx = lens.x > -999 ? lens.x - w / 2 : 0
+      const my = lens.y > -999 ? lens.y - h / 2 : 0
+      const sy = window.scrollY
+      for (const layer of LAYERS) {
+        const { cell } = layer
+        const ox = -mx * layer.mouse + pull.x * layer.pull
+        const oy = -my * layer.mouse + pull.y * layer.pull - sy * layer.scroll
+        const bx = (((ox % cell) + cell) % cell) - cell + 0.5
+        const by = (((oy % cell) + cell) % cell) - cell + 0.5
+        ctx.beginPath()
+        for (let x = bx; x < w + cell; x += cell) {
+          ctx.moveTo(x, 0)
+          ctx.lineTo(x, h)
+        }
+        for (let y = by; y < h + cell; y += cell) {
+          ctx.moveTo(0, y)
+          ctx.lineTo(w, y)
+        }
+        ctx.strokeStyle = layer.line
+        ctx.stroke()
       }
-      for (let y = by; y < h + BACK_CELL; y += BACK_CELL) {
-        ctx.moveTo(0, y)
-        ctx.lineTo(w, y)
-      }
-      ctx.strokeStyle = BACK_LINE
-      ctx.stroke()
+
+      // Daqui pra baixo, tudo em coordenadas da malha.
+      ctx.setTransform(dpr, 0, 0, dpr, 0, -o * dpr)
+      const lx = lens.x
+      const ly = lens.y + o
 
       const n = cols * rows
       const push = LENS_PUSH * lens.s
@@ -246,8 +322,8 @@ export default function GridField() {
         let x = px[k]
         let y = py[k]
         if (push > 0.01) {
-          const dx = x - lens.x
-          const dy = y - lens.y
+          const dx = x - lx
+          const dy = y - ly
           const d = Math.hypot(dx, dy)
           if (d < LENS_RADIUS && d > 0.001) {
             const f = 1 - d / LENS_RADIUS
@@ -285,7 +361,7 @@ export default function GridField() {
       ctx.stroke(mesh)
 
       if (lens.s > 0.01) {
-        const glow = ctx.createRadialGradient(lens.x, lens.y, 0, lens.x, lens.y, LENS_RADIUS)
+        const glow = ctx.createRadialGradient(lx, ly, 0, lx, ly, LENS_RADIUS)
         glow.addColorStop(0, `rgba(236, 171, 72, ${0.22 * lens.s})`)
         glow.addColorStop(1, 'rgba(236, 171, 72, 0)')
         ctx.strokeStyle = glow
@@ -315,11 +391,19 @@ export default function GridField() {
         lens.y += (pointer.y - lens.y) * 0.16
       }
 
+      const tx = drag ? pointer.x - drag.x : 0
+      const ty = drag ? pointer.y + o - drag.y : 0
+      pull.x += (tx - pull.x) * 0.1
+      pull.y += (ty - pull.y) * 0.1
+
+      sync()
       const still = step(dt)
       draw()
 
       const lensDone = target === 0 && lens.s < 0.003
-      if (still && lensDone) {
+      const pullDone = !drag && Math.abs(pull.x) < 0.05 && Math.abs(pull.y) < 0.05
+      if (still && lensDone && pullDone) {
+        pull.x = pull.y = 0
         lens.s = 0
         last = 0
         draw()
@@ -338,7 +422,7 @@ export default function GridField() {
       pointer.y = event.clientY
       pointer.inside = true
       pointer.moved = performance.now()
-      if (drag && Math.hypot(pointer.x - drag.x, pointer.y - drag.y) > 4) drag.moved = true
+      if (drag && Math.hypot(pointer.x - drag.x, pointer.y + o - drag.y) > 4) drag.moved = true
       wake()
     }
 
@@ -346,7 +430,8 @@ export default function GridField() {
       if (event.pointerType !== 'mouse' || event.button !== 0) return
       if (!isBlank(event.target, event.clientX, event.clientY)) return
 
-      drag = { x: event.clientX, y: event.clientY, moved: false }
+      sync()
+      drag = { x: event.clientX, y: event.clientY + o, moved: false }
       for (let k = 0; k < grab.length; k++) {
         const d = Math.hypot(px[k] - drag.x, py[k] - drag.y)
         // Miolo preso por inteiro (move como um pedaço de pano) e um anel em
@@ -408,6 +493,7 @@ export default function GridField() {
     document.addEventListener('mouseleave', onLeave)
     document.addEventListener('selectstart', onSelect)
     window.addEventListener('resize', onResize)
+    window.addEventListener('scroll', wake, { passive: true })
 
     return () => {
       delete host.dataset.live
@@ -418,6 +504,7 @@ export default function GridField() {
       document.removeEventListener('mouseleave', onLeave)
       document.removeEventListener('selectstart', onSelect)
       window.removeEventListener('resize', onResize)
+      window.removeEventListener('scroll', wake)
       cancelAnimationFrame(raf)
       cancelAnimationFrame(resizing)
     }
