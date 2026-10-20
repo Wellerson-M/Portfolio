@@ -33,11 +33,7 @@ export default function Hero() {
     >
       <div className="hero-beam" aria-hidden />
       <div className="hero-in max-w-5xl">
-        <p className="font-mono text-xs tracking-widest text-amber-400">
-          DESENVOLVEDOR WEB · JOINVILLE, SC
-        </p>
-
-        <h1 className="mt-6 font-mono text-[length:var(--text-hero)] leading-[0.9] font-medium tracking-tighter text-ink-100">
+        <h1 className="font-mono text-[length:var(--text-hero)] leading-[0.9] font-medium tracking-tighter text-ink-100">
           Wellerson
           <br />
           <span className="text-ink-400">Meredyk</span>
