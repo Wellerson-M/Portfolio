@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  /* Quase preto, levemente frio. As superficies sobem em degraus pequenos,
+  /* Preto, levemente frio. As superficies sobem em degraus pequenos,
      entao os cartoes se destacam sem precisar de borda forte. */
-  --color-graphite-950: #0c0d10;
+  --color-graphite-950: #060708;
   --color-graphite-900: #121418;
   --color-graphite-850: #181a1f;
   --color-graphite-800: #1f2228;
@@ -52,25 +52,27 @@ body {
   overflow-x: hidden;
 }
 
-/* Fundo: duas manchas de luz bem apagadas e um grao fino por cima, fixos na
-   tela. Da profundidade sem desenhar nada que dispute atencao com os prints. */
+/* Fundo: grade fina fixa na tela, apagando em direcao as bordas, como papel
+   milimetrado sob uma luz. A luz ambar do topo fica no hero. */
 .backdrop {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(60rem 40rem at 85% -10%, rgb(236 171 72 / 0.07), transparent 65%),
-    radial-gradient(50rem 40rem at -10% 40%, rgb(96 125 170 / 0.07), transparent 70%),
-    radial-gradient(40rem 30rem at 70% 110%, rgb(96 125 170 / 0.05), transparent 70%);
+  background-image:
+    linear-gradient(to right, rgb(50 55 62 / 0.22) 1px, transparent 1px),
+    linear-gradient(rgb(50 55 62 / 0.22) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse at center, black, transparent 75%);
 }
 
-.backdrop::after {
-  content: "";
+.hero-beam {
   position: absolute;
-  inset: 0;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  inset: 0 0 auto;
+  height: 42rem;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(55% 45% at 50% -12%, rgb(236 171 72 / 0.13), transparent);
 }
 
 ::selection {

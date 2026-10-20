@@ -31,6 +31,7 @@ export default function Hero() {
       id="inicio"
       className="relative flex min-h-[100svh] scroll-mt-28 flex-col justify-center px-6 pt-24 pb-24 sm:px-10 lg:px-16"
     >
+      <div className="hero-beam" aria-hidden />
       <div className="hero-in max-w-5xl">
         <p className="font-mono text-xs tracking-widest text-amber-400">
           DESENVOLVEDOR WEB · JOINVILLE, SC
