@@ -10,13 +10,31 @@ const CELL = 24
 const ANCHOR = 0.012
 const LINK = 0.24
 const DAMP = 0.86
-const TEAR = 2.4 // link arrebenta ao passar de 2,4x o tamanho da célula
 
-const GRAB_RADIUS = 90
-const GRAB_CORE = 42
+// Rasgo progressivo: acima de YIELD (em células) o fio vai se desgastando, e
+// mais rápido quanto mais esticado; arrebenta quando o desgaste chega a 1, ou
+// na hora se passar de SNAP. Abaixo de YIELD o desgaste vai sarando.
+const YIELD = 1.3
+const SNAP = 2.8
+const WEAR = 5
+const MEND = 0.6
+
+// Pegada: uma pinça pequena no clique e, enquanto o mouse anda, um gancho que
+// fisga a malha por onde passa. Nó que fica longe do cursor vai sendo solto.
+const PINCH = 20
+const HOOK_RADIUS = 22
+const HOOK = 0.95
+const LETGO = 0.94
 const GRAB = 0.5
 const RIPPLE_RADIUS = 150
 const RIPPLE_FORCE = 4
+
+// Resistência: com o mouse parado segurando, a malha reage. A pegada afrouxa,
+// a âncora puxa mais forte e os fios voltam a crescer mesmo sob o puxão.
+const RESIST_AFTER = 220
+const RESIST_TIME = 1.4
+const RESIST_GRIP = 0.9
+const RESIST_ANCHOR = 3
 
 // Link rompido espera um pouco e cresce de volta das duas pontas até o meio.
 const REGROW_DELAY = 1.2
@@ -27,6 +45,10 @@ const LENS_PUSH = 6
 const LENS_IDLE = 1500
 
 const LINE = 'rgba(78, 84, 95, 0.28)'
+// Fio sob tensão esquenta antes de arrebentar; ponta solta fica desfiada.
+const WARM = 'rgba(236, 171, 72, 0.3)'
+const HOT = 'rgba(247, 196, 113, 0.75)'
+const FRAY = 'rgba(134, 142, 153, 0.5)'
 
 // Camadas de trás, da mais funda pra mais rasa. A malha da frente rola junto
 // com a página; estas rolam mais devagar, correm contra o cursor e seguem só
@@ -65,8 +87,9 @@ function isBlank(target: EventTarget | null, x: number, y: number) {
 
 /**
  * Fundo de papel milimetrado desenhado em canvas. O cursor faz a grade abaular
- * de leve, clicar no vazio solta uma onda e arrastar puxa a malha, que rasga
- * se for longe demais e se costura sozinha depois. A malha rola com a página
+ * de leve, clicar no vazio solta uma onda e arrastar puxa a malha, que esquenta
+ * e vai arrebentando fio a fio quanto mais longe vai. Parar o mouse segurando
+ * faz a malha reagir: afrouxa a pegada e se costura de volta. A malha rola com a página
  * e duas grades mais largas atrás rolam mais devagar, em paralaxe.
  *
  * Sem ponteiro fino ou com movimento reduzido, fica só a grade em CSS.
@@ -102,7 +125,11 @@ export default function GridField() {
     // rompido (negativo enquanto espera para começar a crescer).
     let right = new Float32Array(0)
     let down = new Float32Array(0)
+    // Desgaste acumulado dos mesmos links (0 a 1).
+    let rightWear = new Float32Array(0)
+    let downWear = new Float32Array(0)
     let grab = new Float32Array(0)
+    let pinned = new Uint8Array(0)
     let gx = new Float32Array(0)
     let gy = new Float32Array(0)
     let torn = 0
@@ -113,6 +140,7 @@ export default function GridField() {
     const pull = { x: 0, y: 0 }
     // Ponto do clique em coordenadas da malha, não da tela.
     let drag: { x: number; y: number; moved: boolean } | null = null
+    let resist = 0
     let raf = 0
 
     // A física roda num referencial preso ao documento: a malha está em
@@ -143,7 +171,10 @@ export default function GridField() {
       qy = new Float32Array(n)
       right = new Float32Array(n).fill(1)
       down = new Float32Array(n).fill(1)
+      rightWear = new Float32Array(n)
+      downWear = new Float32Array(n)
       grab = new Float32Array(n)
+      pinned = new Uint8Array(n)
       gx = new Float32Array(n)
       gy = new Float32Array(n)
       torn = 0
@@ -164,7 +195,7 @@ export default function GridField() {
       for (let k = from; k < to; k++) {
         px[k] = rx[k]
         py[k] = ry[k]
-        vx[k] = vy[k] = grab[k] = 0
+        vx[k] = vy[k] = grab[k] = pinned[k] = rightWear[k] = downWear[k] = 0
         gx[k] = rx[k]
         gy[k] = ry[k]
         right[k] = down[k] = 1
@@ -173,7 +204,7 @@ export default function GridField() {
 
     const shift = (dir: 1 | -1) => {
       const n = cols * rows
-      const moving = [px, py, vx, vy, right, down, grab, gx, gy]
+      const moving = [px, py, vx, vy, right, down, rightWear, downWear, grab, pinned, gx, gy]
       if (dir === 1) {
         for (const a of moving) a.copyWithin(0, cols)
         for (let k = 0; k < n - cols; k++) {
@@ -209,15 +240,30 @@ export default function GridField() {
       o = sy - base
     }
 
-    const spring = (a: number, b: number, health: Float32Array, ax: Float32Array, ay: Float32Array) => {
+    const spring = (
+      a: number,
+      b: number,
+      health: Float32Array,
+      wear: Float32Array,
+      ax: Float32Array,
+      ay: Float32Array,
+      dt: number,
+    ) => {
       if (health[a] < 1) return
       const dx = px[b] - px[a]
       const dy = py[b] - py[a]
       const len = Math.hypot(dx, dy) || 1
-      if (len > CELL * TEAR) {
-        health[a] = -REGROW_DELAY / REGROW_TIME
-        torn++
-        return
+      const stretch = len / CELL
+      if (stretch > YIELD) {
+        wear[a] += (stretch - YIELD) * WEAR * dt
+        if (wear[a] >= 1 || stretch > SNAP) {
+          health[a] = -REGROW_DELAY / REGROW_TIME
+          wear[a] = 0
+          torn++
+          return
+        }
+      } else if (wear[a] > 0) {
+        wear[a] = Math.max(0, wear[a] - MEND * dt)
       }
       const f = (LINK * (len - CELL)) / len
       ax[a] += dx * f
@@ -237,22 +283,59 @@ export default function GridField() {
         ay = new Float32Array(n)
       }
 
+      const anchor = ANCHOR * (1 + RESIST_ANCHOR * resist)
       for (let k = 0; k < n; k++) {
-        ax[k] = (rx[k] - px[k]) * ANCHOR
-        ay[k] = (ry[k] - py[k]) * ANCHOR
+        ax[k] = (rx[k] - px[k]) * anchor
+        ay[k] = (ry[k] - py[k]) * anchor
       }
 
       for (let j = 0; j < rows; j++) {
         for (let i = 0; i < cols; i++) {
           const k = j * cols + i
-          if (i < cols - 1) spring(k, k + 1, right, ax, ay)
-          if (j < rows - 1) spring(k, k + cols, down, ax, ay)
+          if (i < cols - 1) spring(k, k + 1, right, rightWear, ax, ay, dt)
+          if (j < rows - 1) spring(k, k + cols, down, downWear, ax, ay, dt)
         }
       }
 
       const ox = drag ? pointer.x - drag.x : 0
       const oy = drag ? pointer.y + o - drag.y : 0
 
+      // Com o mouse andando, o gancho fisga o que está embaixo dele e solta
+      // aos poucos o que ficou pra trás. Pedaço arrancado volta pra casa e o
+      // puxão segue rasgando malha nova, em vez de levar um bloco junto.
+      if (drag?.moved && resist === 0) {
+        const hx = pointer.x
+        const hy = pointer.y + o
+        for (let k = 0; k < n; k++) {
+          const d = Math.hypot(px[k] - hx, py[k] - hy)
+          if (d < HOOK_RADIUS) {
+            const w = HOOK * (1 - d / HOOK_RADIUS)
+            if (w > grab[k]) {
+              grab[k] = w
+              gx[k] = px[k] - ox * w
+              gy[k] = py[k] - oy * w
+            }
+          } else if (grab[k] > 0 && !pinned[k]) {
+            grab[k] = grab[k] < 0.02 ? 0 : grab[k] * LETGO
+          }
+        }
+      }
+
+      // A pinça do clique segura até o nó perder todos os fios. Aí ele volta
+      // pra casa e quem segue puxando é o gancho.
+      if (drag) {
+        for (let k = 0; k < n; k++) {
+          if (!pinned[k]) continue
+          const linked =
+            right[k] >= 1 ||
+            down[k] >= 1 ||
+            (k % cols > 0 && right[k - 1] >= 1) ||
+            (k >= cols && down[k - cols] >= 1)
+          if (!linked) pinned[k] = grab[k] = 0
+        }
+      }
+
+      const grip = GRAB * (1 - RESIST_GRIP * resist)
       let restless = false
       for (let k = 0; k < n; k++) {
         vx[k] = (vx[k] + ax[k]) * DAMP
@@ -260,7 +343,7 @@ export default function GridField() {
         // Nó agarrado vai junto com o cursor, mais preso quanto mais perto do
         // ponto do clique. É isso que estica a malha até rasgar.
         if (drag && grab[k] > 0) {
-          const pull = grab[k] * GRAB
+          const pull = grab[k] * grip
           vx[k] += (gx[k] + ox * grab[k] - px[k] - vx[k]) * pull
           vy[k] += (gy[k] + oy * grab[k] - py[k] - vy[k]) * pull
         }
@@ -271,12 +354,25 @@ export default function GridField() {
         }
       }
 
-      if (torn > 0 && !drag) {
-        for (const health of [right, down]) {
+      // Solto, tudo se refaz. Segurando parado, refaz na medida da resistência.
+      const regrow = drag ? resist * 1.6 : 1
+      if (torn > 0 && regrow > 0) {
+        for (const [health, next] of [[right, 1], [down, cols]] as const) {
           for (let k = 0; k < n; k++) {
             if (health[k] >= 1) continue
-            health[k] = Math.min(1, health[k] + dt / REGROW_TIME)
-            if (health[k] === 1) torn--
+            const grown = health[k] + (dt / REGROW_TIME) * regrow
+            if (grown < 1) {
+              health[k] = grown
+              continue
+            }
+            // Só fecha se as pontas já se aproximaram; senão fica por um fio.
+            const b = k + next
+            if (Math.hypot(px[b] - px[k], py[b] - py[k]) < CELL * YIELD) {
+              health[k] = 1
+              torn--
+            } else {
+              health[k] = 0.97
+            }
           }
         }
       }
@@ -336,17 +432,32 @@ export default function GridField() {
       }
 
       const mesh = new Path2D()
+      const warm = new Path2D()
+      const hot = new Path2D()
+      const fray = new Path2D()
       const mend = new Path2D()
+      // Trecho que sai de a em direção a b, com fração t do comprimento.
+      const reach = (path: Path2D, a: number, b: number, t: number) => {
+        path.moveTo(qx[a], qy[a])
+        path.lineTo(qx[a] + (qx[b] - qx[a]) * t, qy[a] + (qy[b] - qy[a]) * t)
+      }
       const link = (a: number, b: number, health: number) => {
         if (health >= 1) {
-          mesh.moveTo(qx[a], qy[a])
-          mesh.lineTo(qx[b], qy[b])
-        } else if (health > 0) {
-          const t = health / 2
-          mend.moveTo(qx[a], qy[a])
-          mend.lineTo(qx[a] + (qx[b] - qx[a]) * t, qy[a] + (qy[b] - qy[a]) * t)
-          mend.moveTo(qx[b], qy[b])
-          mend.lineTo(qx[b] + (qx[a] - qx[b]) * t, qy[b] + (qy[a] - qy[b]) * t)
+          const stretch = Math.hypot(px[b] - px[a], py[b] - py[a]) / CELL
+          const path = stretch > YIELD ? hot : stretch > 1.12 ? warm : mesh
+          path.moveTo(qx[a], qy[a])
+          path.lineTo(qx[b], qy[b])
+          return
+        }
+        // Ponta desfiada de alguns pixels, e o fio novo crescendo além dela.
+        const len = Math.hypot(qx[b] - qx[a], qy[b] - qy[a]) || 1
+        const stub = Math.min(0.3, 6 / len)
+        reach(fray, a, b, stub)
+        reach(fray, b, a, stub)
+        const t = health / 2
+        if (t > stub) {
+          reach(mend, a, b, t)
+          reach(mend, b, a, t)
         }
       }
       for (let j = 0; j < rows; j++) {
@@ -359,6 +470,12 @@ export default function GridField() {
 
       ctx.strokeStyle = LINE
       ctx.stroke(mesh)
+      ctx.strokeStyle = FRAY
+      ctx.stroke(fray)
+      ctx.strokeStyle = WARM
+      ctx.stroke(warm)
+      ctx.strokeStyle = HOT
+      ctx.stroke(hot)
 
       if (lens.s > 0.01) {
         const glow = ctx.createRadialGradient(lx, ly, 0, lx, ly, LENS_RADIUS)
@@ -389,6 +506,12 @@ export default function GridField() {
       } else {
         lens.x += (pointer.x - lens.x) * 0.16
         lens.y += (pointer.y - lens.y) * 0.16
+      }
+
+      if (drag?.moved && time - pointer.moved > RESIST_AFTER) {
+        resist = Math.min(1, resist + dt / RESIST_TIME)
+      } else {
+        resist = Math.max(0, resist - dt * 4)
       }
 
       const tx = drag ? pointer.x - drag.x : 0
@@ -432,12 +555,14 @@ export default function GridField() {
 
       sync()
       drag = { x: event.clientX, y: event.clientY + o, moved: false }
+      resist = 0
       for (let k = 0; k < grab.length; k++) {
         const d = Math.hypot(px[k] - drag.x, py[k] - drag.y)
-        // Miolo preso por inteiro (move como um pedaço de pano) e um anel em
-        // volta que vai soltando. É no anel que a malha estica e rasga.
-        const f = Math.min(1, Math.max(0, (GRAB_RADIUS - d) / (GRAB_RADIUS - GRAB_CORE)))
-        grab[k] = f * f * (3 - 2 * f)
+        // Pinça: só os nós colados ao clique ficam presos de verdade. O resto
+        // da malha vem junto pelos fios, como tecido, até eles cederem.
+        const w = Math.exp(-((d / PINCH) ** 2))
+        grab[k] = w < 0.03 ? 0 : w
+        pinned[k] = grab[k] > 0 ? 1 : 0
         gx[k] = px[k]
         gy[k] = py[k]
       }
@@ -460,6 +585,7 @@ export default function GridField() {
       }
       drag = null
       grab.fill(0)
+      pinned.fill(0)
       wake()
     }
 
