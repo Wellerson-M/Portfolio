@@ -1,7 +1,6 @@
 {
   "name": "Chalé Mirante dos Anjos",
   "order": 40,
-  "note": "proposta de site · freelance",
   "tagline": "Site para uma hospedagem em Rodeio (SC)",
   "summary": "Site para um chalé anunciado no Airbnb, com fotos, guia da região, avaliações dos hóspedes e reserva. Foi feito como proposta para a proprietária.",
   "points": [],
@@ -33,7 +32,7 @@
       "poster": "/assets/projetos/chale/poster.webp"
     }
   },
-  "shotShape": "desk",
+  "shotShape": "screen",
   "shots": [
     {
       "src": "/assets/projetos/chale/01-inicio.webp",
