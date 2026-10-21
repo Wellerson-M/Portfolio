@@ -32,7 +32,7 @@
       "poster": "/assets/projetos/chale/poster.webp"
     }
   },
-  "shotShape": "screen",
+  "shotShape": "desk",
   "shots": [
     {
       "src": "/assets/projetos/chale/01-inicio.webp",
