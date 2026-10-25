@@ -77,15 +77,6 @@ body {
   height: 100%;
 }
 
-.hero-beam {
-  position: absolute;
-  inset: 0 0 auto;
-  height: 42rem;
-  z-index: -1;
-  pointer-events: none;
-  background: radial-gradient(55% 45% at 50% -12%, rgb(236 171 72 / 0.16), transparent);
-}
-
 ::selection {
   background-color: var(--color-amber-400);
   color: var(--color-graphite-950);

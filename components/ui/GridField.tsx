@@ -22,14 +22,14 @@ const SQUASH = 0.3
 
 // Pegada: uma pinça pequena no clique e, enquanto o mouse anda, um gancho que
 // fisga a malha por onde passa. Nó que fica longe do cursor vai sendo solto.
-const PINCH = 20
-const HOOK_RADIUS = 22
+const PINCH = 30
+const HOOK_RADIUS = 34
 const HOOK = 0.95
-const LETGO = 0.94
-const GRAB = 0.5
+const LETGO = 0.965
+const GRAB = 0.7
 // Junto do gancho a malha também é puxada pra dentro, e amassa.
-const BUNCH_RADIUS = 120
-const BUNCH = 0.05
+const BUNCH_RADIUS = 170
+const BUNCH = 0.1
 const RIPPLE_RADIUS = 150
 const RIPPLE_FORCE = 4
 
@@ -573,14 +573,6 @@ export default function GridField() {
       ctx.stroke(warm)
       ctx.strokeStyle = HOT
       ctx.stroke(hot)
-
-      if (lens.s > 0.01) {
-        const glow = ctx.createRadialGradient(lx, ly, 0, lx, ly, LENS_RADIUS)
-        glow.addColorStop(0, `rgba(236, 171, 72, ${0.22 * lens.s})`)
-        glow.addColorStop(1, 'rgba(236, 171, 72, 0)')
-        ctx.strokeStyle = glow
-        ctx.stroke(mesh)
-      }
 
       // Fio se refazendo, até fechar e voltar ao cinza.
       if (torn > 0) {

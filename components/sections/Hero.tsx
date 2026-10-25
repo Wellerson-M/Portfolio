@@ -29,7 +29,6 @@ export default function Hero({ line, contact }: { line: string; contact: Contact
       id="inicio"
       className="relative flex min-h-[100svh] scroll-mt-28 flex-col justify-center px-6 pt-24 pb-24 sm:px-10 lg:px-16"
     >
-      <div className="hero-beam" aria-hidden />
       <div className="hero-in max-w-5xl">
         <h1 className="font-mono text-[length:var(--text-hero)] leading-[0.9] font-medium tracking-tighter text-ink-100">
           Wellerson
