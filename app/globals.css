@@ -41,7 +41,7 @@
 
 html {
   scroll-behavior: smooth;
-  background-color: var(--color-graphite-950);
+  background-color: #1b1e25;
 }
 
 /* Sem fundo no body: ele cobriria o .backdrop, que fica atras (z-index -1). */

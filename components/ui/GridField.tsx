@@ -44,19 +44,55 @@ const LENS_RADIUS = 170
 const LENS_PUSH = 6
 const LENS_IDLE = 1500
 
-const LINE = 'rgba(78, 84, 95, 0.28)'
+const LINE = 'rgba(112, 122, 140, 0.4)'
 // Fio sob tensão esquenta antes de arrebentar; ponta solta fica desfiada.
-const WARM = 'rgba(236, 171, 72, 0.3)'
-const HOT = 'rgba(247, 196, 113, 0.75)'
-const FRAY = 'rgba(134, 142, 153, 0.5)'
+const WARM = 'rgba(236, 171, 72, 0.34)'
+const HOT = 'rgba(247, 196, 113, 0.8)'
+const FRAY = 'rgba(150, 160, 172, 0.55)'
+
+// Por baixo do tecido há outra coisa viva: onde o fio rompe, ela aparece
+// brilhando (âmbar na ferida, ciano e violeta enquanto se refaz).
+const AMBER = '247, 190, 100'
+const CYAN = '92, 214, 224'
+const VIOLET = '146, 118, 255'
 
 // Camadas de trás, da mais funda pra mais rasa. A malha da frente rola junto
 // com a página; estas rolam mais devagar, correm contra o cursor e seguem só
 // um pedaço do puxão, e é essa diferença de velocidade que dá profundidade.
+// Cada uma ondula sozinha, como pano flutuando em líquido.
 const LAYERS = [
-  { cell: 192, line: 'rgba(78, 84, 95, 0.09)', scroll: 0.18, mouse: 0.014, pull: 0.1 },
-  { cell: 96, line: 'rgba(78, 84, 95, 0.14)', scroll: 0.45, mouse: 0.034, pull: 0.3 },
+  { cell: 240, rgb: VIOLET, alpha: 0.13, scroll: 0.14, mouse: 0.014, pull: 0.1, amp: 30, freq: 0.0026, speed: 0.22 },
+  { cell: 120, rgb: CYAN, alpha: 0.13, scroll: 0.34, mouse: 0.03, pull: 0.25, amp: 15, freq: 0.0048, speed: 0.38 },
+  { cell: 60, rgb: '150, 160, 186', alpha: 0.13, scroll: 0.6, mouse: 0.05, pull: 0.45, amp: 6, freq: 0.01, speed: 0.55 },
 ]
+
+// Manchas de luz à deriva no fundo e esporos que flutuam em três profundidades.
+const BLOBS = [
+  { rgb: VIOLET, alpha: 0.11, r: 0.55, x: 0.22, y: 0.3, sx: 0.07, sy: 0.05, scroll: 0.1 },
+  { rgb: CYAN, alpha: 0.085, r: 0.5, x: 0.78, y: 0.55, sx: 0.06, sy: 0.08, scroll: 0.16 },
+  { rgb: AMBER, alpha: 0.07, r: 0.4, x: 0.5, y: 0.85, sx: 0.09, sy: 0.04, scroll: 0.22 },
+]
+const MOTES = 70
+const MOTE_LINK = 130
+const SPARKS = 360
+
+type Mote = { x: number; y: number; z: number; hue: number; seed: number }
+type Spark = { x: number; y: number; vx: number; vy: number; life: number; age: number; hue: number }
+
+const RGB = [AMBER, CYAN, VIOLET]
+
+function sprite(rgb: string) {
+  const c = document.createElement('canvas')
+  c.width = c.height = 64
+  const g = c.getContext('2d')!
+  const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32)
+  grad.addColorStop(0, `rgba(${rgb}, 1)`)
+  grad.addColorStop(0.22, `rgba(${rgb}, 0.38)`)
+  grad.addColorStop(1, `rgba(${rgb}, 0)`)
+  g.fillStyle = grad
+  g.fillRect(0, 0, 64, 64)
+  return c
+}
 
 // Arrastar só começa onde não há nada: fora de links, botões, mídia, texto e
 // superfícies com fundo próprio (cartões, barra de navegação).
@@ -91,6 +127,11 @@ function isBlank(target: EventTarget | null, x: number, y: number) {
  * e vai arrebentando fio a fio quanto mais longe vai. Parar o mouse segurando
  * faz a malha reagir: afrouxa a pegada e se costura de volta. A malha rola com a página
  * e duas grades mais largas atrás rolam mais devagar, em paralaxe.
+ *
+ * Por baixo e ao redor, o fundo tem vida própria: névoa de luz à deriva, três
+ * grades que ondulam em profundidades diferentes e esporos ligados por fios.
+ * Cada rasgo deixa à mostra uma luz que muda de âmbar para ciano e violeta,
+ * solta fagulhas, e é costurado de volta por fios que se enroscam.
  *
  * Sem ponteiro fino ou com movimento reduzido, fica só a grade em CSS.
  */
@@ -133,8 +174,13 @@ export default function GridField() {
     let gx = new Float32Array(0)
     let gy = new Float32Array(0)
     let torn = 0
+    let clock = 0
 
-    const pointer = { x: -9999, y: -9999, inside: false, moved: 0 }
+    const glows = RGB.map(sprite)
+    const motes: Mote[] = []
+    const sparks: Spark[] = []
+
+    const pointer ={ x: -9999, y: -9999, inside: false, moved: 0 }
     const lens = { x: -9999, y: -9999, s: 0 }
     // Puxão suavizado que as camadas de trás seguem (e soltam devagar).
     const pull = { x: 0, y: 0 }
@@ -180,6 +226,18 @@ export default function GridField() {
       torn = 0
       base = Math.floor(window.scrollY / CELL) * CELL
       o = window.scrollY - base
+
+      motes.length = 0
+      const count = Math.round(MOTES * Math.min(1.4, (w * h) / (1440 * 900)))
+      for (let m = 0; m < count; m++) {
+        motes.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          z: 0.25 + Math.random() * 0.75,
+          hue: Math.random() < 0.5 ? 1 : Math.random() < 0.6 ? 2 : 0,
+          seed: Math.random() * 100,
+        })
+      }
 
       for (let j = 0; j < rows; j++) {
         for (let i = 0; i < cols; i++) {
@@ -240,6 +298,24 @@ export default function GridField() {
       o = sy - base
     }
 
+    // Fagulhas que escapam do fio quando ele rompe (x e y já em coordenadas da tela).
+    const burst = (x: number, y: number) => {
+      for (let s = 0; s < 3; s++) {
+        if (sparks.length >= SPARKS) sparks.shift()
+        const a = Math.random() * Math.PI * 2
+        const v = 18 + Math.random() * 60
+        sparks.push({
+          x,
+          y,
+          vx: Math.cos(a) * v,
+          vy: Math.sin(a) * v - 10,
+          life: 0.9 + Math.random() * 1.4,
+          age: 0,
+          hue: Math.random() < 0.55 ? 0 : 1,
+        })
+      }
+    }
+
     const spring = (
       a: number,
       b: number,
@@ -260,6 +336,7 @@ export default function GridField() {
           health[a] = -REGROW_DELAY / REGROW_TIME
           wear[a] = 0
           torn++
+          burst((px[a] + px[b]) / 2, (py[a] + py[b]) / 2 - o)
           return
         }
       } else if (wear[a] > 0) {
@@ -388,24 +465,81 @@ export default function GridField() {
       const mx = lens.x > -999 ? lens.x - w / 2 : 0
       const my = lens.y > -999 ? lens.y - h / 2 : 0
       const sy = window.scrollY
+
+      // Névoa de luz ao fundo, à deriva.
+      ctx.globalCompositeOperation = 'lighter'
+      for (const [b, blob] of BLOBS.entries()) {
+        const r = blob.r * Math.max(w, h)
+        const bx = w * (blob.x + Math.sin(clock * blob.sx + b * 2) * 0.12) - mx * 0.03
+        const by = h * (blob.y + Math.cos(clock * blob.sy + b * 3) * 0.12) - sy * blob.scroll - my * 0.03
+        const cloud = ctx.createRadialGradient(bx, by, 0, bx, by, r)
+        cloud.addColorStop(0, `rgba(${blob.rgb}, ${blob.alpha})`)
+        cloud.addColorStop(1, `rgba(${blob.rgb}, 0)`)
+        ctx.fillStyle = cloud
+        ctx.fillRect(0, 0, w, h)
+      }
+      ctx.globalCompositeOperation = 'source-over'
+
+      // Grades de fundo: linhas que ondulam em fases diferentes, então os
+      // cruzamentos deslizam uns sobre os outros.
       for (const layer of LAYERS) {
-        const { cell } = layer
+        const { cell, amp, freq, speed } = layer
         const ox = -mx * layer.mouse + pull.x * layer.pull
         const oy = -my * layer.mouse + pull.y * layer.pull - sy * layer.scroll
-        const bx = (((ox % cell) + cell) % cell) - cell + 0.5
-        const by = (((oy % cell) + cell) % cell) - cell + 0.5
+        const ix = Math.floor(ox / cell)
+        const iy = Math.floor(oy / cell)
+        const bx = ox - ix * cell - cell + 0.5
+        const by = oy - iy * cell - cell + 0.5
+        const phase = clock * speed
         ctx.beginPath()
-        for (let x = bx; x < w + cell; x += cell) {
-          ctx.moveTo(x, 0)
-          ctx.lineTo(x, h)
+        for (let x = bx, i = ix - 1; x < w + cell; x += cell, i++) {
+          for (let y = -24; y <= h + 24; y += 24) {
+            const xx = x + Math.sin(y * freq + phase + i * 1.9) * amp
+            if (y === -24) ctx.moveTo(xx, y)
+            else ctx.lineTo(xx, y)
+          }
         }
-        for (let y = by; y < h + cell; y += cell) {
-          ctx.moveTo(0, y)
-          ctx.lineTo(w, y)
+        for (let y = by, j = iy - 1; y < h + cell; y += cell, j++) {
+          for (let x = -24; x <= w + 24; x += 24) {
+            const yy = y + Math.sin(x * freq - phase + j * 2.3) * amp
+            if (x === -24) ctx.moveTo(x, yy)
+            else ctx.lineTo(x, yy)
+          }
         }
-        ctx.strokeStyle = layer.line
+        ctx.strokeStyle = `rgba(${layer.rgb}, ${layer.alpha})`
         ctx.stroke()
       }
+
+      // Esporos: pontos de luz com profundidade, ligados por fios finos
+      // quando passam perto uns dos outros.
+      ctx.globalCompositeOperation = 'lighter'
+      const live = motes.map((m) => {
+        const x = m.x - mx * 0.04 * m.z + pull.x * 0.12 * m.z
+        const y = (((m.y - sy * 0.3 * m.z - my * 0.04 * m.z) % h) + h) % h
+        return { x: ((x % w) + w) % w, y, m }
+      })
+      ctx.lineWidth = 0.8
+      for (let a = 0; a < live.length; a++) {
+        for (let b = a + 1; b < live.length; b++) {
+          const dz = Math.abs(live[a].m.z - live[b].m.z)
+          if (dz > 0.3) continue
+          const d = Math.hypot(live[a].x - live[b].x, live[a].y - live[b].y)
+          if (d > MOTE_LINK) continue
+          ctx.strokeStyle = `rgba(${RGB[live[a].m.hue]}, ${(1 - d / MOTE_LINK) * 0.16 * live[a].m.z})`
+          ctx.beginPath()
+          ctx.moveTo(live[a].x, live[a].y)
+          ctx.lineTo(live[b].x, live[b].y)
+          ctx.stroke()
+        }
+      }
+      ctx.lineWidth = 1
+      for (const { x, y, m } of live) {
+        const size = 8 + 18 * m.z
+        ctx.globalAlpha = (0.35 + 0.35 * Math.sin(clock * 1.3 + m.seed)) * m.z
+        ctx.drawImage(glows[m.hue], x - size / 2, y - size / 2, size, size)
+      }
+      ctx.globalAlpha = 1
+      ctx.globalCompositeOperation = 'source-over'
 
       // Daqui pra baixo, tudo em coordenadas da malha.
       ctx.setTransform(dpr, 0, 0, dpr, 0, -o * dpr)
@@ -436,35 +570,75 @@ export default function GridField() {
       const hot = new Path2D()
       const fray = new Path2D()
       const mend = new Path2D()
-      // Trecho que sai de a em direção a b, com fração t do comprimento.
-      const reach = (path: Path2D, a: number, b: number, t: number) => {
-        path.moveTo(qx[a], qy[a])
-        path.lineTo(qx[a] + (qx[b] - qx[a]) * t, qy[a] + (qy[b] - qy[a]) * t)
+      const wounds: number[] = [] // x, y, progresso, de cada link rompido
+      const tips: number[] = [] // x, y, de cada ponta de fio crescendo
+      // Trecho que sai de a em direção a b, com fração t do comprimento, em
+      // espiral: dois fios que se enroscam enquanto crescem, como se o pano
+      // se tecesse sozinho.
+      const reach = (path: Path2D, a: number, b: number, t: number, seed: number, grow: number) => {
+        const dx = qx[b] - qx[a]
+        const dy = qy[b] - qy[a]
+        const len = Math.hypot(dx, dy) || 1
+        const nx = -dy / len
+        const ny = dx / len
+        const ex = qx[a] + dx * t
+        const ey = qy[a] + dy * t
+        const wob = Math.sin(clock * 3.2 + seed) * 5 * grow
+        const mx = (qx[a] + ex) / 2
+        const my = (qy[a] + ey) / 2
+        for (const side of [1, -1]) {
+          path.moveTo(qx[a], qy[a])
+          path.quadraticCurveTo(mx + nx * wob * side, my + ny * wob * side, ex, ey)
+        }
+        tips.push(ex, ey)
       }
-      const link = (a: number, b: number, health: number) => {
+      // Ponta desfiada: o fio rompido solta fibrilas que balançam.
+      const frayEnd = (a: number, b: number, stub: number, seed: number) => {
+        const dx = qx[b] - qx[a]
+        const dy = qy[b] - qy[a]
+        const ex = qx[a] + dx * stub
+        const ey = qy[a] + dy * stub
+        fray.moveTo(qx[a], qy[a])
+        fray.lineTo(ex, ey)
+        const heading = Math.atan2(dy, dx)
+        for (let f = 0; f < 3; f++) {
+          const ang = heading + (f - 1) * 0.7 + Math.sin(clock * 2 + seed + f * 2) * 0.45
+          const reachLen = 5 + ((seed * 7 + f * 13) % 8)
+          fray.moveTo(ex, ey)
+          fray.quadraticCurveTo(
+            ex + Math.cos(ang) * reachLen * 0.5 + Math.sin(ang) * 2,
+            ey + Math.sin(ang) * reachLen * 0.5 - Math.cos(ang) * 2,
+            ex + Math.cos(ang + 0.5) * reachLen,
+            ey + Math.sin(ang + 0.5) * reachLen,
+          )
+        }
+      }
+      const link =(a: number, b: number, health: number, k: number) => {
         if (health >= 1) {
           const stretch = Math.hypot(px[b] - px[a], py[b] - py[a]) / CELL
-          const path = stretch > YIELD ? hot : stretch > 1.12 ? warm : mesh
-          path.moveTo(qx[a], qy[a])
-          path.lineTo(qx[b], qy[b])
+          const target = stretch > YIELD ? hot : stretch > 1.12 ? warm : mesh
+          target.moveTo(qx[a], qy[a])
+          target.lineTo(qx[b], qy[b])
           return
         }
         // Ponta desfiada de alguns pixels, e o fio novo crescendo além dela.
         const len = Math.hypot(qx[b] - qx[a], qy[b] - qy[a]) || 1
         const stub = Math.min(0.3, 6 / len)
-        reach(fray, a, b, stub)
-        reach(fray, b, a, stub)
+        frayEnd(a, b, stub, k)
+        frayEnd(b, a, stub, k + 1)
+        const progress = Math.min(1, Math.max(0, (health + REGROW_DELAY / REGROW_TIME) / (1 + REGROW_DELAY / REGROW_TIME)))
+        wounds.push((qx[a] + qx[b]) / 2, (qy[a] + qy[b]) / 2, progress)
         const t = health / 2
         if (t > stub) {
-          reach(mend, a, b, t)
-          reach(mend, b, a, t)
+          reach(mend, a, b, t, k, 1 - progress)
+          reach(mend, b, a, t, k + 5, 1 - progress)
         }
       }
       for (let j = 0; j < rows; j++) {
         for (let i = 0; i < cols; i++) {
           const k = j * cols + i
-          if (i < cols - 1) link(k, k + 1, right[k])
-          if (j < rows - 1) link(k, k + cols, down[k])
+          if (i < cols - 1) link(k, k + 1, right[k], k)
+          if (j < rows - 1) link(k, k + cols, down[k], k + 3)
         }
       }
 
@@ -485,11 +659,51 @@ export default function GridField() {
         ctx.stroke(mesh)
       }
 
-      // Fio se refazendo: âmbar, até fechar e voltar ao cinza.
-      if (torn > 0) {
-        ctx.strokeStyle = 'rgba(236, 171, 72, 0.45)'
-        ctx.stroke(mend)
+      // O que há por baixo do pano aparece pelos rasgos: âmbar na ferida
+      // fresca, ciano e depois violeta conforme ela se fecha.
+      ctx.globalCompositeOperation = 'lighter'
+      for (let q = 0; q < wounds.length; q += 3) {
+        const p = wounds[q + 2]
+        const x = wounds[q]
+        const y = wounds[q + 1]
+        const pulse = 0.85 + 0.15 * Math.sin(clock * 4 + q)
+        const fresh = Math.max(0, 1 - p * 2.2)
+        const mid = Math.sin(Math.min(1, p * 1.25) * Math.PI)
+        const late = Math.max(0, p * 1.6 - 0.6)
+        if (fresh > 0.01) {
+          ctx.globalAlpha = 0.9 * fresh * pulse
+          ctx.drawImage(glows[0], x - 22, y - 22, 44, 44)
+        }
+        ctx.globalAlpha = 0.75 * mid * pulse
+        ctx.drawImage(glows[1], x - 30, y - 30, 60, 60)
+        if (late > 0.01) {
+          ctx.globalAlpha = 0.5 * late * (1 - p * 0.6)
+          ctx.drawImage(glows[2], x - 26, y - 26, 52, 52)
+        }
       }
+
+      // Fio se refazendo: ciano brilhante, até fechar e voltar ao cinza.
+      if (torn > 0) {
+        ctx.globalAlpha = 1
+        ctx.strokeStyle = `rgba(${CYAN}, 0.6)`
+        ctx.stroke(mend)
+        for (let q = 0; q < tips.length; q += 2) {
+          ctx.globalAlpha = 0.9
+          ctx.drawImage(glows[1], tips[q] - 7, tips[q + 1] - 7, 14, 14)
+        }
+      }
+      ctx.globalAlpha = 1
+
+      // Fagulhas, já em coordenadas da tela.
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      for (const s of sparks) {
+        const life = 1 - s.age / s.life
+        const size = 5 + 10 * life
+        ctx.globalAlpha = life * life * 0.9
+        ctx.drawImage(glows[s.hue], s.x - size / 2, s.y - size / 2, size, size)
+      }
+      ctx.globalAlpha = 1
+      ctx.globalCompositeOperation = 'source-over'
     }
 
     let last = 0
@@ -519,19 +733,34 @@ export default function GridField() {
       pull.x += (tx - pull.x) * 0.1
       pull.y += (ty - pull.y) * 0.1
 
+      clock += dt
+
+      // Esporos seguem uma correnteza lenta; fagulhas sobem e se apagam.
+      for (const m of motes) {
+        const flow = Math.sin(m.x * 0.004 + clock * 0.12 + m.seed) + Math.cos(m.y * 0.005 - clock * 0.1)
+        m.x += Math.cos(flow * 1.6) * 9 * m.z * dt
+        m.y += Math.sin(flow * 1.6) * 9 * m.z * dt
+        if (m.x < 0) m.x += w
+        else if (m.x > w) m.x -= w
+      }
+      for (let s = sparks.length - 1; s >= 0; s--) {
+        const p = sparks[s]
+        p.age += dt
+        if (p.age >= p.life) {
+          sparks.splice(s, 1)
+          continue
+        }
+        p.vx *= 0.98
+        p.vy = p.vy * 0.98 - 14 * dt
+        p.x += p.vx * dt
+        p.y += p.vy * dt
+      }
+
       sync()
-      const still = step(dt)
+      step(dt)
       draw()
 
-      const lensDone = target === 0 && lens.s < 0.003
-      const pullDone = !drag && Math.abs(pull.x) < 0.05 && Math.abs(pull.y) < 0.05
-      if (still && lensDone && pullDone) {
-        pull.x = pull.y = 0
-        lens.s = 0
-        last = 0
-        draw()
-        return
-      }
+      // O fundo respira sozinho, então o laço nunca dorme.
       raf = requestAnimationFrame(frame)
     }
 
@@ -611,6 +840,7 @@ export default function GridField() {
     build()
     draw()
     host.dataset.live = 'true'
+    wake()
 
     window.addEventListener('pointermove', onMove, { passive: true })
     window.addEventListener('pointerdown', onDown)
