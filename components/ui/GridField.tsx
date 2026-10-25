@@ -103,7 +103,7 @@ function isBlank(target: EventTarget | null, x: number, y: number) {
  *
  * Atrás, quatro grades ondulam bem devagar em profundidades diferentes. Puxar
  * amassa a malha em volta do gancho; o que arrebenta não some: as pontas ficam
- * soltas, se enrolam no movimento e viram novelos, até serem tecidas de volta.
+ * soltas e se enrolam no movimento, até serem tecidas de volta.
  *
  * Sem ponteiro fino ou com movimento reduzido, fica só a grade em CSS.
  */
@@ -468,7 +468,6 @@ export default function GridField() {
       const hot = new Path2D()
       const fray = new Path2D()
       const mend = new Path2D()
-      const knots = new Path2D()
       // Fio novo crescendo de a em direção a b, até a fração t: dois fios que
       // se enroscam enquanto crescem, como se o pano se tecesse sozinho.
       const reach = (a: number, b: number, t: number, seed: number, grow: number) => {
@@ -546,21 +545,6 @@ export default function GridField() {
           const k = j * cols + i
           if (i < cols - 1) link(k, k + 1, right[k], k)
           if (j < rows - 1) link(k, k + cols, down[k], k + 3)
-
-          // Nó que perdeu vários fios vira um novelo.
-          const lost =
-            (right[k] < 1 ? 1 : 0) +
-            (down[k] < 1 ? 1 : 0) +
-            (i > 0 && right[k - 1] < 1 ? 1 : 0) +
-            (j > 0 && down[k - cols] < 1 ? 1 : 0)
-          if (lost >= 2) {
-            const r = 3 + lost * 1.6
-            for (let e = 0; e <= lost; e++) {
-              const rot = k * 0.7 + e * 1.1
-              knots.moveTo(qx[k] + r * Math.cos(rot), qy[k] + r * Math.sin(rot))
-              knots.ellipse(qx[k], qy[k], r, r * 0.55, rot, 0, Math.PI * 2)
-            }
-          }
         }
       }
 
@@ -568,7 +552,6 @@ export default function GridField() {
       ctx.stroke(mesh)
       ctx.strokeStyle = FRAY
       ctx.stroke(fray)
-      ctx.stroke(knots)
       ctx.strokeStyle = WARM
       ctx.stroke(warm)
       ctx.strokeStyle = HOT
